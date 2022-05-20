@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.DownloadManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.MacAddress;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -35,11 +36,16 @@ import pub.devrel.easypermissions.EasyPermissions;
 public class DeviceList extends AppCompatActivity {
     //widgets
     Button btnPaired;
+    Button btnGo;
     ListView devicelist;
     //Bluetooth
     private BluetoothAdapter myBluetooth = null;
     private Set<BluetoothDevice> pairedDevices;
-    public static String EXTRA_ADDRESS = "device_address";
+
+    // For intents to forward data of devices to connect to
+    public static final String EXTRA_NAMES = "NAMES";
+    public static final String EXTRA_ADDRESSES = "ADRESSES";
+
 
     @RequiresApi(api = Build.VERSION_CODES.S)
     @Override
@@ -49,15 +55,16 @@ public class DeviceList extends AppCompatActivity {
         setContentView(R.layout.activity_device_list);
 
         //Calling widgets
-        btnPaired = (Button)findViewById(R.id.button);
+        btnPaired = (Button)findViewById(R.id.update);
         devicelist = (ListView)findViewById(R.id.listView);
+        btnGo = (Button)findViewById(R.id.select);
 
         // Check for BT permissions
         ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
             if (isGranted) {
                 Toast.makeText(this, "Bluetooth permissions are granted.", Toast.LENGTH_LONG);
             } else {
-                Toast.makeText(this, "Bluetooth permissions not granted.", Toast.LENGTH_LONG);
+                Toast.makeText(this, "Bluetooth permissions are necessary for this app in order to work properly!", Toast.LENGTH_LONG);
             }
         });
 
@@ -66,30 +73,26 @@ public class DeviceList extends AppCompatActivity {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
             if(!EasyPermissions.hasPermissions(this, BT_PERMISSIONS)){
-                EasyPermissions.requestPermissions(this, "gib bt", 0, BT_PERMISSIONS);
+                EasyPermissions.requestPermissions(this, "Bluetooth permissions are required!", 0, BT_PERMISSIONS);
             }
 
         }
 
         // Get BT adapter for the phones device
         myBluetooth = BluetoothAdapter.getDefaultAdapter();
-
-        Log.i("test", "BTAdresse: " + myBluetooth);
-        if(myBluetooth == null)
-        {
+        if(myBluetooth == null) {
             //Show a mensag. that the device has no bluetooth adapter
             Toast.makeText(getApplicationContext(), "Bluetooth Device Not Available", Toast.LENGTH_LONG).show();
 
             //finish apk
             finish();
-        }
-        else if(!myBluetooth.isEnabled())
-        {
+        } else if(!myBluetooth.isEnabled()) {
                 //Ask to the user turn the bluetooth on
                 Intent turnBTon = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 startActivityForResult(turnBTon,1);
         }
 
+        // Handle click on "update devices" button
         btnPaired.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -97,12 +100,24 @@ public class DeviceList extends AppCompatActivity {
             }
         });
 
+        // Handlo click on "select" button
+        btnGo.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+
+                // Make an intent to start next activity.
+                Intent i = new Intent(DeviceList.this, GameMenu.class);
+
+                //Change the activity.
+//                i.putExtra(EXTRA_ADDRESSES, Devices.deviceAddress); //this will be received at ledControl (class) Activity
+                startActivity(i);
+            }
+        });
+
     }
 
     private void pairedDevicesList() {
-        Log.i("test", "myBluetooth: " + Boolean.toString(myBluetooth == null));
         pairedDevices = myBluetooth.getBondedDevices();
-        Log.i("test", "pairedDevices Set: " + Boolean.toString(pairedDevices == null));
         ArrayList list = new ArrayList();
 
         if (pairedDevices.size()>0) {
@@ -113,8 +128,9 @@ public class DeviceList extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "No Paired Bluetooth Devices Found.", Toast.LENGTH_LONG).show();
         }
 
-        final ArrayAdapter adapter = new ArrayAdapter(this,android.R.layout.simple_list_item_1, list);
+        final ArrayAdapter adapter = new ArrayAdapter(this,android.R.layout.simple_list_item_multiple_choice, list);
         devicelist.setAdapter(adapter);
+        devicelist.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
         devicelist.setOnItemClickListener(myListClickListener); //Method called when the device from the list is clicked
 
     }
@@ -126,17 +142,23 @@ public class DeviceList extends AppCompatActivity {
     }
 
     private AdapterView.OnItemClickListener myListClickListener = new AdapterView.OnItemClickListener() {
-        public void onItemClick (AdapterView<?> av, View v, int arg2, long arg3) {
+        public void onItemClick (AdapterView<?> av, View v, int pos, long arg3) {
             // Get the device MAC address, the last 17 chars in the View
             String info = ((TextView) v).getText().toString();
             String address = info.substring(info.length() - 17);
+            info = info.replace(address, "");
+            MacAddress mcaddress = MacAddress.fromString(address);
 
-            // Make an intent to start next activity.
-            Intent i = new Intent(DeviceList.this, ledControl.class);
-
-            //Change the activity.
-            i.putExtra(EXTRA_ADDRESS, address); //this will be received at ledControl (class) Activity
-            startActivity(i);
+            boolean selected = devicelist.isItemChecked(pos);
+            try {
+                if (selected) {
+                    Devices.addDevice(info, mcaddress);
+                } else {
+                    Devices.removeDevice(mcaddress);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     };
 

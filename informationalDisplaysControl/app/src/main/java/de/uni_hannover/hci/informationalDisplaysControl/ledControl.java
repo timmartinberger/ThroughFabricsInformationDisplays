@@ -1,6 +1,7 @@
 package de.uni_hannover.hci.informationalDisplaysControl;
 
 
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -17,6 +18,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.os.AsyncTask;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.IOException;
@@ -36,12 +38,17 @@ public class ledControl extends AppCompatActivity {
     //SPP UUID. Look for it
     static final UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
+    @RequiresApi(api = Build.VERSION_CODES.P)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         Intent newint = getIntent();
-        address = newint.getStringExtra(DeviceList.EXTRA_ADDRESS); //receive the address of the bluetooth device
+
+
+        address = Devices.getMacAsString(0); //receive the address of the bluetooth device
+        Log.i("test", "DeviceAdd list length: " + Devices.deviceAddress.get(0).toString().toUpperCase());
+
 
         //view of the ledControl
         setContentView(R.layout.activity_led_control);
@@ -144,8 +151,9 @@ public class ledControl extends AppCompatActivity {
                  BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
                  btSocket.connect();//start connection
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 ConnectSuccess = false;//if the try failed, you can check the exception here
+                Log.i("test", e.toString());
             }
             return null;
         }

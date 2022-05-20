@@ -21,26 +21,38 @@
         android:textIsSelectable="false" />
 
     <Button
+        android:id="@+id/update"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginRight="20dp"
+        android:background="#f44336"
+        android:fontFamily="sans-serif-smallcaps"
+        android:text="Update"
+        android:textColor="#212121" />
+
+    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Paired Devices"
-        android:id="@+id/button"
+        android:text="Select"
+        android:id="@+id/select"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
         android:textColor="#212121"
         android:fontFamily="sans-serif-smallcaps"
-        android:layout_alignParentStart="true"
+        android:layout_toRightOf="@+id/update"
+        android:layout_toEndOf="@+id/update"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:background="#f44336" />
+        android:background="#f44336"
+         />
 
     <ListView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/listView"
         android:layout_below="@+id/textView"
-        android:layout_alignRight="@+id/imageView"
-        android:layout_alignEnd="@+id/imageView"
-        android:layout_above="@+id/button" />
+        android:layout_above="@+id/update" />
 
 </RelativeLayout>

@@ -12,6 +12,7 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextPaint;
 import android.text.style.ImageSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +22,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GameAdapter extends RecyclerView.Adapter<GameAdapter.Viewholder> {
 
@@ -33,6 +33,7 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.Viewholder> {
         this.context = context;
         this.gameList = courseModelArrayList;
     }
+
 
     @NonNull
     @Override
@@ -64,15 +65,28 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.Viewholder> {
 
     // View holder class for initializing of
     // your views such as TextView and Imageview.
-    public class Viewholder extends RecyclerView.ViewHolder {
+    public class Viewholder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private ImageView gameImage;
         private TextView gameTitle, gameDescription;
 
         public Viewholder(@NonNull View itemView) {
             super(itemView);
+            itemView.setOnClickListener(this);
             gameTitle = itemView.findViewById(R.id.gameTitle);
             gameDescription = itemView.findViewById(R.id.gameDescription);
             gameImage = itemView.findViewById(R.id.gameImage);
+        }
+
+        @Override
+        public void onClick(View view) {
+            String gameTitleStr = gameTitle.getText().toString();
+            // TODO: Start game activities from here
+            if (gameTitleStr.equals(context.getString(R.string.who_am_i))){
+                Intent intent = new Intent(context, ledControl.class);
+                context.startActivity(intent);
+            } else if (gameTitleStr.equals(context.getString(R.string.hot_potatoe))) {
+
+            }
         }
     }
 }
