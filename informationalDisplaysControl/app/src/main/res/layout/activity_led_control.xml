@@ -30,12 +30,9 @@
         android:layout_height="60dp"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="300dp"
-        android:textColor="#212121"
         android:fadingEdge="none"
         android:id="@+id/off_btn"
-        android:fontFamily="sans-serif-smallcaps"
         android:textSize="30sp"
-        android:background="@drawable/rounded_button"
         android:text="SEND"
         tools:typeface="monospace" />
 
@@ -45,10 +42,7 @@
         android:layout_height="48dp"
         android:layout_marginTop="500dp"
         android:layout_centerHorizontal="true"
-        android:background="@drawable/rounded_button"
         android:fadingEdge="none"
-        android:fontFamily="sans-serif-smallcaps"
-        android:textColor="#212121"
         android:textSize="20sp"
         android:text="DISCONNECT"
         tools:typeface="monospace" />

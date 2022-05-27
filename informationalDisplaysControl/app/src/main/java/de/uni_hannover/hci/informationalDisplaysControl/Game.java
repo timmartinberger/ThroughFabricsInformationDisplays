@@ -1,13 +1,13 @@
 package de.uni_hannover.hci.informationalDisplaysControl;
+import android.graphics.drawable.Drawable;
 
-import android.media.Image;
 
 public class Game {
     private String gameName;
     private String gameDescription;
-    private Image gameImage;
+    private Drawable gameImage;
 
-    public Game(String gameName, String gameDescription, Image image) {
+    public Game(String gameName, String gameDescription, Drawable image) {
         this.gameName = gameName;
         this.gameDescription = gameDescription;
         this.gameImage = image;
@@ -29,11 +29,11 @@ public class Game {
         this.gameDescription = gameDescription;
     }
 
-    public Image getGameImage() {
+    public Drawable getGameImage() {
         return gameImage;
     }
 
-    public void setGameImage(Image gameImage) {
+    public void setGameImage(Drawable gameImage) {
         this.gameImage = gameImage;
     }
 }

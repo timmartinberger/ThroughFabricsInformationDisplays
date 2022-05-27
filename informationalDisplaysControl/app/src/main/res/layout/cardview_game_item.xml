@@ -6,16 +6,16 @@
     android:layout_height="wrap_content"
     android:layout_margin="10dp"
     app:cardBackgroundColor="@color/cardview_dark_background"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="8dp"
-    app:cardMaxElevation="10dp"
-    app:cardPreventCornerOverlap="true">
 
+    app:cardCornerRadius="10dp"
+    app:cardElevation="15dp"
+    app:cardMaxElevation="15dp"
+    app:cardPreventCornerOverlap="true">
 
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="200dp">
 
         <ImageView
             android:layout_width="match_parent"

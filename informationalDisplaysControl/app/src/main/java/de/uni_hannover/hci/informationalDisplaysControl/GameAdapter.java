@@ -52,7 +52,7 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.Viewholder> {
         Game model = gameList.get(position);
         holder.gameTitle.setText(model.getGameName());
         holder.gameDescription.setText(model.getGameDescription());
-        holder.gameImage.setImageResource(0);
+        holder.gameImage.setImageDrawable(model.getGameImage());
         holder.gameDescription.setJustificationMode(JUSTIFICATION_MODE_INTER_WORD);
     }
 
@@ -75,6 +75,7 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.Viewholder> {
             gameTitle = itemView.findViewById(R.id.gameTitle);
             gameDescription = itemView.findViewById(R.id.gameDescription);
             gameImage = itemView.findViewById(R.id.gameImage);
+//            itemView.getLayoutParams().height = 800;
         }
 
         @Override

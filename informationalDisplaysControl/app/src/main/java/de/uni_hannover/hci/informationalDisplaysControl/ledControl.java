@@ -43,12 +43,8 @@ public class ledControl extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Intent newint = getIntent();
-
-
         address = Devices.getMacAsString(0); //receive the address of the bluetooth device
         Log.i("test", "DeviceAdd list length: " + Devices.deviceAddress.get(0).toString().toUpperCase());
-
 
         //view of the ledControl
         setContentView(R.layout.activity_led_control);
