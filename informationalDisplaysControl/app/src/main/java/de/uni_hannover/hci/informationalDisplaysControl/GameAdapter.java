@@ -69,27 +69,13 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.Viewholder> {
             gameTitle = itemView.findViewById(R.id.gameTitle);
             gameDescription = itemView.findViewById(R.id.gameDescription);
             gameImage = itemView.findViewById(R.id.gameImage);
-//            itemView.getLayoutParams().height = 800;
         }
 
         @Override
         public void onClick(View view) {
-            view.ge
-            String gameTitleStr = gameTitle.getText().toString();
-            // TODO: Start game activities from here
-            if (gameTitleStr.equals(context.getString(R.string.send_text))){
-                Intent intent = new Intent(context, sendText.class);
-                context.startActivity(intent);
-
-            } else if (gameTitleStr.equals(context.getString(R.string.hot_pixels))) {
-
-            } else if (gameTitleStr.equals(context.getString(R.string.four_wins))) {
-
-            } else if (gameTitleStr.equals(context.getString(R.string.who_am_i))) {
-
-            } else if (gameTitleStr.equals(context.getString(R.string.drawing_guessing))) {
-
-            }
+            int pos = this.getAdapterPosition();
+            Intent intent = new Intent(context, gameList.get(pos).getApp());
+            context.startActivity(intent);
         }
     }
 }

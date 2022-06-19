@@ -8,9 +8,9 @@ public class Game {
     private final String gameName;
     private final String gameDescription;
     private final Drawable gameImage;
-    private final AppCompatActivity app;
+    private final Class app;
 
-    public Game(String gameName, String gameDescription, Drawable image, AppCompatActivity app) {
+    public Game(String gameName, String gameDescription, Drawable image, Class app) {
         this.gameName = gameName;
         this.gameDescription = gameDescription;
         this.gameImage = image;
@@ -32,6 +32,6 @@ public class Game {
     }
 
 
-    private AppCompatActivity getApp(){ return this.app; }
+    public Class getApp(){ return this.app; }
 
 }

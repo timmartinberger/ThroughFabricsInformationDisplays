@@ -9,6 +9,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
+import de.uni_hannover.hci.informationalDisplaysControl.GameLogic.sendText;
+
 
 public class GameMenu extends AppCompatActivity {
 
@@ -32,7 +34,7 @@ public class GameMenu extends AppCompatActivity {
             gameList.add(new Game(getString(R.string.hot_pixels), "", null, null));
             gameList.add(new Game(getString(R.string.drawing_guessing), "", null, null));
             gameList.add(new Game(getString(R.string.four_wins), "", null, null));
-            gameList.add(new Game(getString(R.string.send_text), "Send a any text to the LED Matrices", null, null));
+            gameList.add(new Game(getString(R.string.send_text), "Send a any text to the LED Matrices", null, sendText.class));
         }
         // For API versions < 21 WITHOUT background image
         else {
@@ -40,7 +42,7 @@ public class GameMenu extends AppCompatActivity {
             gameList.add(new Game(getString(R.string.hot_pixels), "", null, null));
             gameList.add(new Game(getString(R.string.drawing_guessing), "", null, null));
             gameList.add(new Game(getString(R.string.four_wins), "", null, null));
-            gameList.add(new Game(getString(R.string.send_text), "Send a any text to the LED Matrices", null, null));
+            gameList.add(new Game(getString(R.string.send_text), "Send a any text to the LED Matrices", null, sendText.class));
         }
 
         GameAdapter gameAdapter = new GameAdapter(this, gameList);
