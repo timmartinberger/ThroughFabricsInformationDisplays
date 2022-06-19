@@ -4,15 +4,7 @@ import static android.text.Layout.JUSTIFICATION_MODE_INTER_WORD;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
-import android.text.Spanned;
-import android.text.TextPaint;
-import android.text.style.ImageSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +14,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
+
+import de.uni_hannover.hci.informationalDisplaysControl.GameLogic.sendText;
 
 public class GameAdapter extends RecyclerView.Adapter<GameAdapter.Viewholder> {
 
@@ -82,10 +76,17 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.Viewholder> {
         public void onClick(View view) {
             String gameTitleStr = gameTitle.getText().toString();
             // TODO: Start game activities from here
-            if (gameTitleStr.equals(context.getString(R.string.who_am_i))){
-                Intent intent = new Intent(context, ledControl.class);
+            if (gameTitleStr.equals(context.getString(R.string.send_text))){
+                Intent intent = new Intent(context, sendText.class);
                 context.startActivity(intent);
-            } else if (gameTitleStr.equals(context.getString(R.string.hot_potatoe))) {
+
+            } else if (gameTitleStr.equals(context.getString(R.string.hot_pixels))) {
+
+            } else if (gameTitleStr.equals(context.getString(R.string.four_wins))) {
+
+            } else if (gameTitleStr.equals(context.getString(R.string.who_am_i))) {
+
+            } else if (gameTitleStr.equals(context.getString(R.string.drawing_guessing))) {
 
             }
         }

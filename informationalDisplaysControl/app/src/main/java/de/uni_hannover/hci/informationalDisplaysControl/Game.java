@@ -1,39 +1,37 @@
 package de.uni_hannover.hci.informationalDisplaysControl;
 import android.graphics.drawable.Drawable;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 
 public class Game {
-    private String gameName;
-    private String gameDescription;
-    private Drawable gameImage;
+    private final String gameName;
+    private final String gameDescription;
+    private final Drawable gameImage;
+    private final AppCompatActivity app;
 
-    public Game(String gameName, String gameDescription, Drawable image) {
+    public Game(String gameName, String gameDescription, Drawable image, AppCompatActivity app) {
         this.gameName = gameName;
         this.gameDescription = gameDescription;
         this.gameImage = image;
+        this.app = app;
     }
 
     public String getGameName() {
-        return gameName;
+        return this.gameName;
     }
 
-    public void setGameName(String gameName) {
-        this.gameName = gameName;
-    }
 
     public String getGameDescription() {
-        return gameDescription;
+        return this.gameDescription;
     }
 
-    public void setGameDescription(String gameDescription) {
-        this.gameDescription = gameDescription;
-    }
 
     public Drawable getGameImage() {
-        return gameImage;
+        return this.gameImage;
     }
 
-    public void setGameImage(Drawable gameImage) {
-        this.gameImage = gameImage;
-    }
+
+    private AppCompatActivity getApp(){ return this.app; }
+
 }

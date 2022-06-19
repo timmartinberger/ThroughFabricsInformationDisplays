@@ -22,7 +22,7 @@
 #define A_PIN 14
 #define B_PIN 16
 #define C_PIN 17
-#define D_PIN 18
+#define D_PIN 18 // Hier Ground
 #define E_PIN -1 // required for 1/32 scan panels, like 64x64. Any available pin would do, i.e. IO32
 #define LAT_PIN 32
 #define OE_PIN 33
@@ -57,7 +57,7 @@ void drawText(char *text){
       dma_display->setTextColor(dma_display->color444(50, 100, 200));
       dma_display->print(text[w]);
     }
-    delay(35);
+    delay(80);
     dma_display->fillScreen(dma_display->color444(0, 0, 0));
   }
   /*

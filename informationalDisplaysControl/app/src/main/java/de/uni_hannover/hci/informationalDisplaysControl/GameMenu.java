@@ -28,15 +28,19 @@ public class GameMenu extends AppCompatActivity {
         gameList = new ArrayList<>();
         // For API versions >= 21 with background image
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            gameList.add(new Game(getString(R.string.who_am_i), "This is a guessing game where players use yes or no questions to guess the identity of a famous person or fictional character.", getDrawable(R.drawable.whoami_darker)));
-            gameList.add(new Game(getString(R.string.hot_potatoe), "", null));
-            gameList.add(new Game("Tetris", "", null));
+            gameList.add(new Game(getString(R.string.who_am_i), "This is a guessing game where players use yes or no questions to guess the identity of a famous person or fictional character.", getDrawable(R.drawable.whoami_darker), null));
+            gameList.add(new Game(getString(R.string.hot_pixels), "", null, null));
+            gameList.add(new Game(getString(R.string.drawing_guessing), "", null, null));
+            gameList.add(new Game(getString(R.string.four_wins), "", null, null));
+            gameList.add(new Game(getString(R.string.send_text), "Send a any text to the LED Matrices", null, null));
         }
         // For API versions < 21 WITHOUT background image
         else {
-            gameList.add(new Game(getString(R.string.who_am_i), "This is a guessing game where players use yes or no questions to guess the identity of a famous person or fictional character.", null));
-            gameList.add(new Game(getString(R.string.hot_potatoe), "", null));
-            gameList.add(new Game("Tetris", "", null));
+            gameList.add(new Game(getString(R.string.who_am_i), "This is a guessing game where players use yes or no questions to guess the identity of a famous person or fictional character.", null, null));
+            gameList.add(new Game(getString(R.string.hot_pixels), "", null, null));
+            gameList.add(new Game(getString(R.string.drawing_guessing), "", null, null));
+            gameList.add(new Game(getString(R.string.four_wins), "", null, null));
+            gameList.add(new Game(getString(R.string.send_text), "Send a any text to the LED Matrices", null, null));
         }
 
         GameAdapter gameAdapter = new GameAdapter(this, gameList);

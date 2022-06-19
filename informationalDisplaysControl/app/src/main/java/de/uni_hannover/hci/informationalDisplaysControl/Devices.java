@@ -1,11 +1,16 @@
 package de.uni_hannover.hci.informationalDisplaysControl;
 import android.net.MacAddress;
+
+import androidx.appcompat.app.AppCompatActivity;
+
 import java.util.ArrayList;
 
 
 public class Devices {
-    public static ArrayList<String> deviceNames;
-    public static ArrayList<MacAddress> deviceAddress;
+    private static ArrayList<String> deviceNames;
+    private static ArrayList<MacAddress> deviceAddress;
+    private static int countDevices = 0;
+
 
     public static void addDevice(String name, MacAddress address) throws Exception {
         if (deviceNames == null) {
@@ -17,7 +22,12 @@ public class Devices {
         } else {
             deviceNames.add(name);
             deviceAddress.add(address);
+            countDevices++;
         }
+    }
+
+    public static int getDeviceCount(){
+        return countDevices;
     }
 
     public static String getMacAsString(int index){
@@ -28,6 +38,6 @@ public class Devices {
         int idx = deviceAddress.indexOf(address);
         deviceNames.remove(idx);
         deviceAddress.remove(idx);
-
+        countDevices--;
     }
 }

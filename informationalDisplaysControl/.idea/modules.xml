@@ -4,6 +4,9 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/informationalDisplaysControl.iml" filepath="$PROJECT_DIR$/.idea/modules/informationalDisplaysControl.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/informationalDisplaysControl.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/informationalDisplaysControl.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/informationalDisplaysControl.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/informationalDisplaysControl.app.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/informationalDisplaysControl.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/informationalDisplaysControl.app.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/informationalDisplaysControl.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/informationalDisplaysControl.app.unitTest.iml" />
     </modules>
   </component>
 </project>

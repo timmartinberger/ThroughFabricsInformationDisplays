@@ -3,7 +3,10 @@
 
     <!--  Game Names  -->
     <string name="who_am_i">Who am I?</string>
-    <string name="hot_potatoe">Hot Potato</string>
+    <string name="hot_pixels">Hot Pixels</string>
+    <string name="four_wins">Connect 4</string>
+    <string name="send_text">Send Text</string>
+    <string name="drawing_guessing">Drawing and Guessing</string>
 
     <!--  Activity names  -->
     <string name="title_activity_game_menu">SELECT A GAME</string>
