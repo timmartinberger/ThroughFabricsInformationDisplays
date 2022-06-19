@@ -74,6 +74,7 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.Viewholder> {
 
         @Override
         public void onClick(View view) {
+            view.ge
             String gameTitleStr = gameTitle.getText().toString();
             // TODO: Start game activities from here
             if (gameTitleStr.equals(context.getString(R.string.send_text))){
