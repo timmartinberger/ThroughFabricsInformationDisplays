@@ -36,13 +36,13 @@ public class sendText extends AppCompatActivity {
 //    private ProgressDialog progress;
 //    BluetoothAdapter myBluetooth = null;
 //    BluetoothSocket btSocket = null;
-//    private boolean isBtConnected = false;
+      private volatile boolean isConnected = false;
 
     // Alternative code for multiple devices
     ArrayList<String> addresses = new ArrayList<String>();
     private ProgressDialog progress;
     BluetoothAdapter btAdapter = null;
-    ArrayList<BluetoothSocket> btSockets = new ArrayList<BluetoothSocket>();
+    BluetoothSocket btSocket = null;
 
 
 
@@ -55,8 +55,6 @@ public class sendText extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         for(int i = 0; i < Devices.getDeviceCount(); i++){
-            Log.i("testbt", "i = " + Integer.toString(i));
-            Log.i("testbt", "Dev.len = " + Integer.toString(Devices.getDeviceCount()));
             addresses.add(Devices.getMacAsString(i)); //receive the address of the bluetooth device
         }
 
@@ -68,18 +66,12 @@ public class sendText extends AppCompatActivity {
         Discnt = (Button)findViewById(R.id.dis_btn);
         textInput = (EditText)findViewById(R.id.textInput);
 
-        for(String address: addresses){
-            new ConnectBT(address).execute(); //Call the class to connect
-        }
-
 
         // Send text to ALL esp when button clicked
         SendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                for(int i = 0; i < btSockets.size(); i++) {
-                    sendText(i);
-                }
+                sendTextToAll();
             }
         });
 
@@ -87,9 +79,8 @@ public class sendText extends AppCompatActivity {
         Discnt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                for(int i = 0; i < btSockets.size(); i++) {
-                    Disconnect(i);
-                }
+                Disconnect();
+
             }
         });
 
@@ -97,15 +88,19 @@ public class sendText extends AppCompatActivity {
     }
 
     // Send text via bluetooth to ALL esp32
-    private void sendText(int index) {
-        BluetoothSocket socket = btSockets.get(index);
-        if (socket != null) {
-            try {
-                socket.getOutputStream().write(textInput.getText().toString().getBytes());
-                Log.i("test", "Der Stream wurde gesendet!");
-            } catch (IOException e) {
-                msg("Error");
+    private void sendTextToAll() {
+        try {
+            for(String address: addresses) {
+                new ConnectBT(address).execute(); //Call the class to connect
+                while (!isConnected) {
+
+                }
+                btSocket.getOutputStream().write(textInput.getText().toString().getBytes());
+                Disconnect();
             }
+            Log.i("test", "Der Stream wurde gesendet!");
+        } catch (IOException e) {
+            msg("Error");
         }
     }
 
@@ -115,12 +110,11 @@ public class sendText extends AppCompatActivity {
     }
 
     // Disconnect a esp with a specific index in btSocket
-    private void Disconnect(int index) {
-        BluetoothSocket socket = btSockets.get(index);
-        if (socket!=null) {
+    private void Disconnect() {
+        if (btSocket!=null) {
             try {
-                socket.getOutputStream().write((addresses + " disconnected!").getBytes());
-                socket.close(); //close connection
+                btSocket.getOutputStream().write((addresses + " disconnected!").getBytes());
+                btSocket.close(); //close connection
             } catch (IOException e)
             { msg("Error");}
         }
@@ -131,8 +125,7 @@ public class sendText extends AppCompatActivity {
 
     private class ConnectBT extends AsyncTask<Void, Void, Void>  {
         private boolean ConnectSuccess = true; //if it's here, it's almost connected
-        private BluetoothSocket btSocket;
-        private String btAddress;
+        private final String btAddress;
         private boolean isConnected;
 
         public ConnectBT(String address){
@@ -151,14 +144,11 @@ public class sendText extends AppCompatActivity {
         protected Void doInBackground(Void... devices) { //while the progress dialog is shown, the connection is done in background
             try {
                 if (btSocket == null || !isConnected) {
-                    if (btAdapter == null) {
-                        btAdapter = BluetoothAdapter.getDefaultAdapter();//get the mobile bluetooth device
-                    }
+                    btAdapter = BluetoothAdapter.getDefaultAdapter();//get the mobile bluetooth device
                     BluetoothDevice dispositivo = btAdapter.getRemoteDevice(btAddress);//connects to the device's address and checks if it's available
                     btSocket = dispositivo.createInsecureRfcommSocketToServiceRecord(myUUID);//create a RFCOMM (SPP) connection
                     BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
                     btSocket.connect();//start connection
-                    btSockets.add(btSocket);
                 }
             } catch (Exception e) {
                 ConnectSuccess = false;//if the try failed, you can check the exception here
