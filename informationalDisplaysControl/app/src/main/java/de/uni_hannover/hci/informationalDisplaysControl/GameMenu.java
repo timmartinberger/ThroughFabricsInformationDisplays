@@ -31,7 +31,7 @@ public class GameMenu extends AppCompatActivity {
         // For API versions >= 21 with background image
 
         gameList.add(new Game(getString(R.string.who_am_i), "This is a guessing game where players use yes or no questions to guess the identity of a famous person or fictional character.", getDrawable(R.drawable.whoami_darker), WhoAmI.class));
-        gameList.add(new Game(getString(R.string.hot_pixels), "", null, null));
+        gameList.add(new Game(getString(R.string.hot_pixels), "", null, DobbleController.class));
         gameList.add(new Game(getString(R.string.drawing_guessing), "", null, null));
         gameList.add(new Game(getString(R.string.four_wins), "", null, null));
         gameList.add(new Game(getString(R.string.send_text), "Send a any text to the LED Matrices", null, sendText.class));
