@@ -15,8 +15,6 @@ import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 
-import de.uni_hannover.hci.informationalDisplaysControl.GameLogic.sendText;
-
 public class GameAdapter extends RecyclerView.Adapter<GameAdapter.Viewholder> {
 
     private Context context;
