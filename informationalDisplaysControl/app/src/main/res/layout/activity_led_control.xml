@@ -15,7 +15,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:fontFamily="sans-serif-smallcaps"
-        android:text="Send text to all players;"
+        android:text="Send text to all players"
         android:textColor="#f44336"
         android:textSize="23dp" />
 

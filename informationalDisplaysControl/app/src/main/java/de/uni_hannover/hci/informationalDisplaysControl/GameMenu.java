@@ -34,7 +34,7 @@ public class GameMenu extends AppCompatActivity {
         gameList.add(new Game(getString(R.string.drawing_guessing), "", null, null));
         gameList.add(new Game(getString(R.string.four_wins), "", null, null));
         gameList.add(new Game(getString(R.string.send_text), "Send a any text to the LED Matrices", null, SendText.class));
-
+        gameList.add(new Game("BLETest", "", null, BLETestActivity.class));
 
         GameAdapter gameAdapter = new GameAdapter(this, gameList);
 
