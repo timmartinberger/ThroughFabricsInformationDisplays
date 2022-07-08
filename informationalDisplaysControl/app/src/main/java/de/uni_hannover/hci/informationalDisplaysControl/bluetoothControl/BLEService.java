@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -18,6 +19,8 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 
+import java.util.List;
+
 public class BLEService extends Service {
 
     private Binder binder = new LocalBinder();
@@ -27,6 +30,8 @@ public class BLEService extends Service {
     // connection state
     public final static String ACTION_GATT_CONNECTED = "GATT_CONNECTED";
     public final static String ACTION_GATT_DISCONNECTED = "GATT_DISCONNECTED";
+    public final static String ACTION_GATT_SERVICES_DISCOVERED = "GATT_SERVICES_DISCOVERED";
+
 
     private static final int STATE_DISCONNECTED = 0;
     private static final int STATE_CONNECTED = 2;
@@ -35,11 +40,11 @@ public class BLEService extends Service {
 
 
 
-
+    // Callback, um Verbindung zu überwachen -------------------------------------------------------
     private final BluetoothGattCallback bluetoothGattCallback = new BluetoothGattCallback() {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-            Log.i("testbt", "connected to GattServer");
+            Log.i("testbt", "CONNECTION_STATE_CHANGE: "+ newState);
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 // successfully connected to the GATT Server
                 connectionState = STATE_CONNECTED;
@@ -47,15 +52,24 @@ public class BLEService extends Service {
 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 // disconnected from the GATT Server
-                Log.i("testbt", "disconnected from GattServer");
                 connectionState = STATE_DISCONNECTED;
                 broadcastUpdate(ACTION_GATT_DISCONNECTED);
             }
         }
+
+        @Override
+        public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
+            } else {
+                Log.i("testbt", "onServicesDiscovered received: " + status);
+            }
+
+
+        }
     };
 
-
-
+    // Service initialisieren ----------------------------------------------------------------------
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -78,10 +92,9 @@ public class BLEService extends Service {
         return true;
     }
 
-
+    // Verbindungsaufbau ---------------------------------------------------------------------------
     @SuppressLint("MissingPermission")
     public boolean connect(final String address) {
-        Log.i("testbt", "is this überhaupt used?");
         if (bluetoothAdapter == null || address == null) {
             Log.w("testbt", "BluetoothAdapter not initialized or unspecified address.");
             return false;
@@ -89,7 +102,7 @@ public class BLEService extends Service {
 
         try {
             final BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
-            bluetoothGatt = device.connectGatt(this, false, bluetoothGattCallback);
+            bluetoothGatt = device.connectGatt(this, true, bluetoothGattCallback);
             return true;
         } catch (IllegalArgumentException exception) {
             Log.w("testbt", "Device not found with provided address.  Unable to connect.");
@@ -97,6 +110,14 @@ public class BLEService extends Service {
         }
     }
 
+    // BLE-Service - suchen und verbinden ----------------------------------------------------------
+    public List<BluetoothGattService> getSupportedGattServices() {
+        if (bluetoothGatt == null) return null;
+        return bluetoothGatt.getServices();
+    }
+
+
+    // Service/BLE-Verbindung beenden --------------------------------------------------------------
     @Override
     public boolean onUnbind(Intent intent) {
         close();
@@ -112,11 +133,11 @@ public class BLEService extends Service {
         bluetoothGatt = null;
     }
 
+    // Activities benachrichtigen ------------------------------------------------------------------
     private void broadcastUpdate(final String action) {
         final Intent intent = new Intent(action);
         sendBroadcast(intent);
     }
-
 
     public static IntentFilter makeGattUpdateIntentFilter() {
         final IntentFilter intentFilter = new IntentFilter();

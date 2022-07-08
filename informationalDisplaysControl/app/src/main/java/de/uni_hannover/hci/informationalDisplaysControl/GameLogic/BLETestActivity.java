@@ -1,5 +1,7 @@
 package de.uni_hannover.hci.informationalDisplaysControl.GameLogic;
 
+import static android.graphics.Color.*;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
@@ -21,12 +23,19 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.graphics.BlendMode;
+import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,11 +47,9 @@ import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.BLEServ
 public class BLETestActivity extends AppCompatActivity {
 
     private BluetoothAdapter bluetoothAdapter;
-    private ArrayList<BluetoothGatt> bluetoothGatts;
     private BluetoothLeScanner bluetoothLeScanner;
     private boolean scanning;
 
-    private boolean connected;
     private Handler handler = new Handler();
 
     // addresses of ESPs
@@ -54,12 +61,14 @@ public class BLETestActivity extends AppCompatActivity {
     private ScanCallback leScanCallback;
 
     // UI elements
-    Button scanButton;
+    Button readButton;
     Button connectButton;
     TextView scanResultView;
+    ImageView statusCircle;
 
+    public static final int STATUS_RED = 0;
+    public static final int STATUS_GREEN = 1;
 
-    private BluetoothGattCallback gattCallback;
     private BLEService bleService;
 
     @Override
@@ -69,19 +78,18 @@ public class BLETestActivity extends AppCompatActivity {
 
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
-        bluetoothGatts = new ArrayList<>();
 
-        scanButton = findViewById(R.id.scan);
         connectButton = findViewById(R.id.connect);
         scanResultView = findViewById(R.id.results);
+        statusCircle = findViewById(R.id.bleTestStatus);
+        readButton = findViewById(R.id.read);
+        readButton.setClickable(false);
 
-        connectButton.setClickable(false);
 
-
-        scanButton.setOnClickListener(new View.OnClickListener() {
+        readButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                scanLeDevice();
+
             }
         });
 
@@ -91,6 +99,7 @@ public class BLETestActivity extends AppCompatActivity {
                 connect();
             }
         });
+
 
         // Scan-------------------------------------------------------------------------------------
         leScanCallback = new ScanCallback() {
@@ -103,28 +112,6 @@ public class BLETestActivity extends AppCompatActivity {
                 scanResultView.setText(scanResultView.getText() + res);
             }
         };
-
-        // Callback --------------------------------------------------------------------------------
-        gattCallback = new BluetoothGattCallback() {
-            @Override
-            public void onPhyUpdate(BluetoothGatt gatt, int txPhy, int rxPhy, int status) {
-                super.onPhyUpdate(gatt, txPhy, rxPhy, status);
-                Log.i("Testbt", "onPhyUpdate");
-            }
-
-            @Override
-            public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-                if (newState == BluetoothProfile.STATE_CONNECTED) {
-                    // successfully connected to the GATT Server
-                    Log.i("testbt", "BLE connected!");
-                } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                    // disconnected from the GATT Server
-                    Log.i("testbt", "BLE disconnected!");
-                }
-            }
-
-        };
-
     }
 
     // Scanning ------------------------------------------------------------------------------------
@@ -178,21 +165,24 @@ public class BLETestActivity extends AppCompatActivity {
     }
 
     // Verbindungsaufbau ---------------------------------------------------------------------------
-    public void connect() {
-        BluetoothDevice esp1Device = bluetoothAdapter.getRemoteDevice(ESP1Address);
-        Log.i("testbt", "connect called!");
-        checkPermissions(this, this);
-        BluetoothGatt gatt1 = esp1Device.connectGatt(this, false, gattCallback);
-        bluetoothGatts.add(gatt1);
-        Intent gattServiceIntent = new Intent(this, BLEService.class);
-        bindService(gattServiceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+    private void connect() {
+        if (bleService == null) {
+            checkPermissions(this, this);
+            Intent gattServiceIntent = new Intent(this, BLEService.class);
+            getApplicationContext().bindService(gattServiceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+        } else {
+            if(bleService.connect(ESP1Address)){
+                setStatusColor(STATUS_GREEN);
+                Log.i("testbt", "bleService connected!");
+            }
+        }
     }
 
-    // Verbindungsaufbau
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             bleService = ((BLEService.LocalBinder) service).getService();
+            Log.i("testbt", "SERVICE connected!");
             if (bleService != null) {
                 // call functions on service to check connection and connect to devices
                 if (!bleService.initialize()) {
@@ -201,16 +191,28 @@ public class BLETestActivity extends AppCompatActivity {
                 }
                 // perform device connection
                 if (bleService.connect(ESP1Address)){
-                    Log.i("testbt", "bleService connected!");
+                    setStatusColor(STATUS_GREEN);
+                    Log.i("testbt","bleService connected!");
                 }
             }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
+            Log.i("testbt", "SERVICE disconnected!");
             bleService = null;
         }
     };
+
+    private void setStatusColor(int status){
+        if (status == STATUS_RED) {
+            statusCircle.setColorFilter(parseColor("#fc1c03"));
+            readButton.setClickable(false);
+        } else if (status == STATUS_GREEN) {
+            statusCircle.setColorFilter(parseColor("#05a615"));
+            readButton.setClickable(true);
+        }
+    }
 
     // Benachrichtigungen über Verbindungsstatus vom BLEService empfangen --------------------------
     private final BroadcastReceiver gattUpdateReceiver = new BroadcastReceiver() {
@@ -219,11 +221,10 @@ public class BLETestActivity extends AppCompatActivity {
             final String action = intent.getAction();
             Log.i("testbt", "Broadcastreceiver got notification: " + action);
             if (BLEService.ACTION_GATT_CONNECTED.equals(action)) {
-                connected = true;
                 Toast.makeText(getApplicationContext(), ESP1Address + " connected!", Toast.LENGTH_LONG).show();
             } else if (BLEService.ACTION_GATT_DISCONNECTED.equals(action)) {
-                connected = false;
                 Toast.makeText(getApplicationContext(), ESP1Address + " disconnected!", Toast.LENGTH_LONG).show();
+                setStatusColor(STATUS_RED);
             }
         }
     };
@@ -233,18 +234,16 @@ public class BLETestActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         registerReceiver(gattUpdateReceiver, BLEService.makeGattUpdateIntentFilter());
-        if (bleService != null) {
-            // Todo check if connect hier wirklich gecalled werden soll!
-            final boolean result = bleService.connect(ESP1Address);
-            Log.d("testbt", "Connect request result=" + result);
-        }
+//        if (bleService != null) {
+//            final boolean result = bleService.connect(ESP1Address);
+//            Log.i("testbt", "Connect request result=" + result);
+//        }
     }
 
     @Override
     protected void onPause() {
-        Log.i("testbt", "onPause()");
         super.onPause();
-        //unregisterReceiver(gattUpdateReceiver);
+        unregisterReceiver(gattUpdateReceiver);
     }
 
 

@@ -7,10 +7,10 @@
     tools:context=".GameLogic.BLETestActivity">
 
     <Button
-        android:id="@+id/scan"
+        android:id="@+id/read"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:text="Scan"
+        android:text="Read"
         android:layout_marginBottom="100dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/connect"
@@ -25,7 +25,7 @@
         android:layout_marginBottom="100dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/scan" />
+        app:layout_constraintStart_toEndOf="@id/read" />
 
     <TextView
         android:id="@+id/scantext"
@@ -37,6 +37,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
+    <ImageView
+        android:id="@+id/bleTestStatus"
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:src="@drawable/bt_status_circle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/results"
         android:layout_width="wrap_content"
@@ -45,5 +55,5 @@
         app:layout_constraintTop_toTopOf="@id/scantext"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="@id/scan"/>
+        app:layout_constraintBottom_toBottomOf="@id/read"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
