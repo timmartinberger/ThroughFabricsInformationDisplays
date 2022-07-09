@@ -7,10 +7,10 @@
     tools:context=".GameLogic.BLETestActivity">
 
     <Button
-        android:id="@+id/read"
+        android:id="@+id/disconnect"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:text="Read"
+        android:text="Disconnect"
         android:layout_marginBottom="100dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/connect"
@@ -25,7 +25,7 @@
         android:layout_marginBottom="100dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/read" />
+        app:layout_constraintStart_toEndOf="@id/disconnect" />
 
     <TextView
         android:id="@+id/scantext"
@@ -55,5 +55,5 @@
         app:layout_constraintTop_toTopOf="@id/scantext"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="@id/read"/>
+        app:layout_constraintBottom_toBottomOf="@id/disconnect"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

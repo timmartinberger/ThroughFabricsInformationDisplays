@@ -12,6 +12,8 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
@@ -40,6 +42,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 
 import de.uni_hannover.hci.informationalDisplaysControl.R;
 import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.BLEService;
@@ -61,7 +66,7 @@ public class BLETestActivity extends AppCompatActivity {
     private ScanCallback leScanCallback;
 
     // UI elements
-    Button readButton;
+    Button disconnectButton;
     Button connectButton;
     TextView scanResultView;
     ImageView statusCircle;
@@ -70,6 +75,9 @@ public class BLETestActivity extends AppCompatActivity {
     public static final int STATUS_GREEN = 1;
 
     private BLEService bleService;
+
+    // For reading characteristics
+    private ArrayList<ArrayList<BluetoothGattCharacteristic>> mGattCharacteristics;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,14 +90,15 @@ public class BLETestActivity extends AppCompatActivity {
         connectButton = findViewById(R.id.connect);
         scanResultView = findViewById(R.id.results);
         statusCircle = findViewById(R.id.bleTestStatus);
-        readButton = findViewById(R.id.read);
-        readButton.setClickable(false);
+        disconnectButton = findViewById(R.id.disconnect);
+        disconnectButton.setClickable(false);
 
 
-        readButton.setOnClickListener(new View.OnClickListener() {
+        disconnectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                scanResultView.setText("");
+                bleService.close();
             }
         });
 
@@ -172,8 +181,7 @@ public class BLETestActivity extends AppCompatActivity {
             getApplicationContext().bindService(gattServiceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
         } else {
             if(bleService.connect(ESP1Address)){
-                setStatusColor(STATUS_GREEN);
-                Log.i("testbt", "bleService connected!");
+                Log.i("testbt", "BLE Gatt connected!");
             }
         }
     }
@@ -191,7 +199,7 @@ public class BLETestActivity extends AppCompatActivity {
                 }
                 // perform device connection
                 if (bleService.connect(ESP1Address)){
-                    setStatusColor(STATUS_GREEN);
+
                     Log.i("testbt","bleService connected!");
                 }
             }
@@ -207,12 +215,55 @@ public class BLETestActivity extends AppCompatActivity {
     private void setStatusColor(int status){
         if (status == STATUS_RED) {
             statusCircle.setColorFilter(parseColor("#fc1c03"));
-            readButton.setClickable(false);
+            disconnectButton.setClickable(false);
         } else if (status == STATUS_GREEN) {
             statusCircle.setColorFilter(parseColor("#05a615"));
-            readButton.setClickable(true);
+            disconnectButton.setClickable(true);
         }
     }
+
+    // Demonstrates how to iterate through the supported GATT
+    // Services/Characteristics.
+    // In this sample, we populate the data structure that is bound to the
+    // ExpandableListView on the UI.
+//    private void displayGattServices(List<BluetoothGattService> gattServices) {
+//        if (gattServices == null) return;
+//        String uuid = null;
+//        String unknownServiceString = getResources().getString(R.string.unknown_service);
+//        String unknownCharaString = getResources().getString(R.string.unknown_characteristic);
+//
+//        ArrayList<HashMap<String, String>> gattServiceData = new ArrayList<HashMap<String, String>>();
+//        ArrayList<ArrayList<HashMap<String, String>>> gattCharacteristicData = new ArrayList<ArrayList<HashMap<String, String>>>();
+//
+//        mGattCharacteristics = new ArrayList<ArrayList<BluetoothGattCharacteristic>>();
+//
+//        // Loops through available GATT Services.
+//        for (BluetoothGattService gattService : gattServices) {
+//
+//            HashMap<String, String> currentServiceData = new HashMap<String, String>();
+//            uuid = gattService.getUuid().toString();
+//            currentServiceData.put(LIST_NAME, SampleGattAttributes.lookup(uuid, unknownServiceString));
+//            currentServiceData.put(LIST_UUID, uuid);
+//            gattServiceData.add(currentServiceData);
+//
+//            ArrayList<HashMap<String, String>> gattCharacteristicGroupData = new ArrayList<HashMap<String, String>>();
+//            List<BluetoothGattCharacteristic> gattCharacteristics = gattService.getCharacteristics();
+//            ArrayList<BluetoothGattCharacteristic> charas = new ArrayList<BluetoothGattCharacteristic>();
+//
+//            // Loops through available Characteristics.
+//            for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics) {
+//                charas.add(gattCharacteristic);
+//                HashMap<String, String> currentCharaData = new HashMap<String, String>();
+//                uuid = gattCharacteristic.getUuid().toString();
+//                currentCharaData.put(LIST_NAME, SampleGattAttributes.lookup(uuid, unknownCharaString));
+//                currentCharaData.put(LIST_UUID, uuid);
+//                gattCharacteristicGroupData.add(currentCharaData);
+//            }
+//            mGattCharacteristics.add(charas);
+//            gattCharacteristicData.add(gattCharacteristicGroupData);
+//        }
+//    }
+
 
     // Benachrichtigungen über Verbindungsstatus vom BLEService empfangen --------------------------
     private final BroadcastReceiver gattUpdateReceiver = new BroadcastReceiver() {
@@ -222,9 +273,20 @@ public class BLETestActivity extends AppCompatActivity {
             Log.i("testbt", "Broadcastreceiver got notification: " + action);
             if (BLEService.ACTION_GATT_CONNECTED.equals(action)) {
                 Toast.makeText(getApplicationContext(), ESP1Address + " connected!", Toast.LENGTH_LONG).show();
+                setStatusColor(STATUS_GREEN);
             } else if (BLEService.ACTION_GATT_DISCONNECTED.equals(action)) {
                 Toast.makeText(getApplicationContext(), ESP1Address + " disconnected!", Toast.LENGTH_LONG).show();
                 setStatusColor(STATUS_RED);
+            } else if (BLEService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
+                //displayGattServices(bleService.getSupportedGattServices());
+                Log.i("testbt", "Services found:");
+                for(BluetoothGattService service: bleService.getSupportedGattServices()){
+                    Log.i("testbt", service.getUuid().toString());
+                }
+            } else if (BLEService.ACTION_DATA_AVAILABLE.equals(action)) {
+                String result = intent.getStringExtra("CHAR_DATA");
+                Log.i("testbt", "Value: " + result);
+                scanResultView.setText(result);
             }
         }
     };
@@ -245,9 +307,5 @@ public class BLETestActivity extends AppCompatActivity {
         super.onPause();
         unregisterReceiver(gattUpdateReceiver);
     }
-
-
-
-
 
 }
