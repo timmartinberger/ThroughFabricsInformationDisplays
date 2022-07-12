@@ -41,6 +41,7 @@ public class BLEService extends Service {
 
     private final static String TEST_SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
     private final static String TEST_CHARACTERISTIC_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
+    private final static String BUTTON_CHARACTERISTIC_UUID = "07bf0001-7a36-490f-ba53-345b3642a694";
 
     private static final int STATE_DISCONNECTED = 0;
     private static final int STATE_CONNECTED = 2;
@@ -78,6 +79,12 @@ public class BLEService extends Service {
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                setCharacteristicNotification(bluetoothGatt.getService(UUID.fromString(TEST_SERVICE_UUID)).getCharacteristic(UUID.fromString(BUTTON_CHARACTERISTIC_UUID)), true);
                 try {
                     Thread.sleep(200);
                 } catch (InterruptedException e) {
@@ -247,13 +254,16 @@ public class BLEService extends Service {
 
     private void broadcastUpdate(final String action, final BluetoothGattCharacteristic characteristic) {
         final Intent intent = new Intent(action);
-
         // This is special handling for the Heart Rate Measurement profile. Data
         // parsing is carried out as per profile specifications.
         if (TEST_CHARACTERISTIC_UUID.equals(characteristic.getUuid().toString())) {
             final String testCharacteristic = characteristic.getStringValue(0);
             Log.i("testbt", String.format("Test characteristic: %s", testCharacteristic));
             intent.putExtra("CHAR_DATA", testCharacteristic);
+        } else if (BUTTON_CHARACTERISTIC_UUID.equals(characteristic.getUuid().toString())) {
+            final String data = characteristic.getStringValue(0);
+            if (data.equals("1")) Log.i("testbt", "BUTTON PRESSED!");
+            else Log.i("testbt", "BUTTON NOT PRESSED!");
         } else {
             // For all other profiles, writes the data formatted in HEX.
             final byte[] data = characteristic.getValue();
