@@ -9,12 +9,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCallback;
-import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
-import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
@@ -22,29 +17,17 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.graphics.BlendMode;
-import android.graphics.Color;
-import android.graphics.ColorFilter;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.ShapeDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
 
 import de.uni_hannover.hci.informationalDisplaysControl.R;
 import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.BLEService;
@@ -66,18 +49,16 @@ public class BLETestActivity extends AppCompatActivity {
     private ScanCallback leScanCallback;
 
     // UI elements
-    Button disconnectButton;
+    Button readButton;
     Button connectButton;
-    TextView scanResultView;
+    Button writeButton;
+    EditText scanResultView;
     ImageView statusCircle;
 
     public static final int STATUS_RED = 0;
     public static final int STATUS_GREEN = 1;
 
     private BLEService bleService;
-
-    // For reading characteristics
-    private ArrayList<ArrayList<BluetoothGattCharacteristic>> mGattCharacteristics;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,15 +71,23 @@ public class BLETestActivity extends AppCompatActivity {
         connectButton = findViewById(R.id.connect);
         scanResultView = findViewById(R.id.results);
         statusCircle = findViewById(R.id.bleTestStatus);
-        disconnectButton = findViewById(R.id.disconnect);
-        disconnectButton.setClickable(false);
+        writeButton = findViewById(R.id.write);
+        readButton = findViewById(R.id.read);
+        readButton.setClickable(false);
+
+        writeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                bleService.writeCharacteristic(scanResultView.getText().toString());
+            }
+        });
 
 
-        disconnectButton.setOnClickListener(new View.OnClickListener() {
+        readButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 scanResultView.setText("");
-                bleService.close();
+                bleService.readCharacteristic();
             }
         });
 
@@ -215,55 +204,12 @@ public class BLETestActivity extends AppCompatActivity {
     private void setStatusColor(int status){
         if (status == STATUS_RED) {
             statusCircle.setColorFilter(parseColor("#fc1c03"));
-            disconnectButton.setClickable(false);
+            readButton.setClickable(false);
         } else if (status == STATUS_GREEN) {
             statusCircle.setColorFilter(parseColor("#05a615"));
-            disconnectButton.setClickable(true);
+            readButton.setClickable(true);
         }
     }
-
-    // Demonstrates how to iterate through the supported GATT
-    // Services/Characteristics.
-    // In this sample, we populate the data structure that is bound to the
-    // ExpandableListView on the UI.
-//    private void displayGattServices(List<BluetoothGattService> gattServices) {
-//        if (gattServices == null) return;
-//        String uuid = null;
-//        String unknownServiceString = getResources().getString(R.string.unknown_service);
-//        String unknownCharaString = getResources().getString(R.string.unknown_characteristic);
-//
-//        ArrayList<HashMap<String, String>> gattServiceData = new ArrayList<HashMap<String, String>>();
-//        ArrayList<ArrayList<HashMap<String, String>>> gattCharacteristicData = new ArrayList<ArrayList<HashMap<String, String>>>();
-//
-//        mGattCharacteristics = new ArrayList<ArrayList<BluetoothGattCharacteristic>>();
-//
-//        // Loops through available GATT Services.
-//        for (BluetoothGattService gattService : gattServices) {
-//
-//            HashMap<String, String> currentServiceData = new HashMap<String, String>();
-//            uuid = gattService.getUuid().toString();
-//            currentServiceData.put(LIST_NAME, SampleGattAttributes.lookup(uuid, unknownServiceString));
-//            currentServiceData.put(LIST_UUID, uuid);
-//            gattServiceData.add(currentServiceData);
-//
-//            ArrayList<HashMap<String, String>> gattCharacteristicGroupData = new ArrayList<HashMap<String, String>>();
-//            List<BluetoothGattCharacteristic> gattCharacteristics = gattService.getCharacteristics();
-//            ArrayList<BluetoothGattCharacteristic> charas = new ArrayList<BluetoothGattCharacteristic>();
-//
-//            // Loops through available Characteristics.
-//            for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics) {
-//                charas.add(gattCharacteristic);
-//                HashMap<String, String> currentCharaData = new HashMap<String, String>();
-//                uuid = gattCharacteristic.getUuid().toString();
-//                currentCharaData.put(LIST_NAME, SampleGattAttributes.lookup(uuid, unknownCharaString));
-//                currentCharaData.put(LIST_UUID, uuid);
-//                gattCharacteristicGroupData.add(currentCharaData);
-//            }
-//            mGattCharacteristics.add(charas);
-//            gattCharacteristicData.add(gattCharacteristicGroupData);
-//        }
-//    }
-
 
     // Benachrichtigungen über Verbindungsstatus vom BLEService empfangen --------------------------
     private final BroadcastReceiver gattUpdateReceiver = new BroadcastReceiver() {
@@ -290,7 +236,6 @@ public class BLETestActivity extends AppCompatActivity {
             }
         }
     };
-
 
     @Override
     protected void onResume() {

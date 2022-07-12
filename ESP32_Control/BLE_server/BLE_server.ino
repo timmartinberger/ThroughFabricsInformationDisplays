@@ -31,7 +31,7 @@ void setup() {
   pService = pServer->createService(SERVICE_UUID);
   pCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE);
 
-  pCharacteristic->setValue("Hello World says Neil and this is to look hau match data1übertragen werden kann bla balbla Tra la la la la");
+  pCharacteristic->setValue("xjcscqavtijsytibtacpqddaewyjmtfsgtcghkqxkbbmpcpirwpajfhrncixfzxqmkijwnakmuhbkzybjwxdxihvlgjpvqbkvswjthvipopfzbnaochhtggbdbatkxafp");
   pService->start();
   // BLEAdvertising *pAdvertising = pServer->getAdvertising();  // this still is working for backward compatibility
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();

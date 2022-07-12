@@ -21,6 +21,8 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -49,6 +51,7 @@ public class BLEService extends Service {
 
     // Callback, um Verbindung zu überwachen -------------------------------------------------------
     private final BluetoothGattCallback bluetoothGattCallback = new BluetoothGattCallback() {
+        @SuppressLint("MissingPermission")
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             Log.i("testbt", "CONNECTION_STATE_CHANGE: "+ newState);
@@ -57,6 +60,11 @@ public class BLEService extends Service {
                 connectionState = STATE_CONNECTED;
                 broadcastUpdate(ACTION_GATT_CONNECTED);
                 // discover services after connection
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 bluetoothGatt.discoverServices();
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 // disconnected from the GATT Server
@@ -70,7 +78,12 @@ public class BLEService extends Service {
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
-                readCharacteristic(bluetoothGatt.getService(UUID.fromString(TEST_SERVICE_UUID)).getCharacteristic(UUID.fromString(TEST_CHARACTERISTIC_UUID)));
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                readCharacteristic();
             } else {
                 Log.i("testbt", "onServicesDiscovered received: " + status);
             }
@@ -132,22 +145,53 @@ public class BLEService extends Service {
         }
     }
 
-    // BLE-Service - suchen und verbinden ----------------------------------------------------------
+    // BLE-Service - Services und Characteristics suchen und kommunizieren -------------------------
     @SuppressLint("MissingPermission")
     public List<BluetoothGattService> getSupportedGattServices() {
         if (bluetoothGatt == null) return null;
         return bluetoothGatt.getServices();
     }
 
+    // read value
     @SuppressLint("MissingPermission")
-    public void readCharacteristic(BluetoothGattCharacteristic characteristic) {
+    public void readCharacteristic() {
         if (bluetoothGatt == null) {
             Log.w("testbt", "BluetoothGatt not initialized");
             return;
         }
+        BluetoothGattCharacteristic characteristic = bluetoothGatt.getService(UUID.fromString(TEST_SERVICE_UUID)).getCharacteristic(UUID.fromString(TEST_CHARACTERISTIC_UUID));
         bluetoothGatt.readCharacteristic(characteristic);
     }
 
+    // write string value
+    @SuppressLint("MissingPermission")
+    public void writeCharacteristic(String data) {
+        if (bluetoothAdapter == null || bluetoothGatt == null) {
+            Log.w("testbt", "BluetoothAdapter not initialized");
+            return;
+        }
+
+        byte[] value = data.getBytes(StandardCharsets.UTF_8);
+        BluetoothGattCharacteristic characteristic = bluetoothGatt.getService(UUID.fromString(TEST_SERVICE_UUID)).getCharacteristic(UUID.fromString(TEST_CHARACTERISTIC_UUID));
+        characteristic.setValue(value);
+        bluetoothGatt.writeCharacteristic(characteristic);
+    }
+
+    // write int value
+    @SuppressLint("MissingPermission")
+    public void writeCharacteristic(int data) {
+        if (bluetoothAdapter == null || bluetoothGatt == null) {
+            Log.w("testbt", "BluetoothAdapter not initialized");
+            return;
+        }
+
+        byte[] value = BigInteger.valueOf(data).toByteArray();
+        BluetoothGattCharacteristic characteristic = bluetoothGatt.getService(UUID.fromString(TEST_SERVICE_UUID)).getCharacteristic(UUID.fromString(TEST_CHARACTERISTIC_UUID));
+        characteristic.setValue(value);
+        bluetoothGatt.writeCharacteristic(characteristic);
+    }
+
+    // setup notification
     @SuppressLint("MissingPermission")
     public void setCharacteristicNotification(BluetoothGattCharacteristic characteristic, boolean enabled) {
         if (bluetoothGatt == null) {
@@ -206,9 +250,9 @@ public class BLEService extends Service {
 
         // This is special handling for the Heart Rate Measurement profile. Data
         // parsing is carried out as per profile specifications.
-        if (TEST_CHARACTERISTIC_UUID.equals(characteristic.getUuid())) {
+        if (TEST_CHARACTERISTIC_UUID.equals(characteristic.getUuid().toString())) {
             final String testCharacteristic = characteristic.getStringValue(0);
-            Log.i("testbt", String.format("Test characteristic: %d", testCharacteristic));
+            Log.i("testbt", String.format("Test characteristic: %s", testCharacteristic));
             intent.putExtra("CHAR_DATA", testCharacteristic);
         } else {
             // For all other profiles, writes the data formatted in HEX.
