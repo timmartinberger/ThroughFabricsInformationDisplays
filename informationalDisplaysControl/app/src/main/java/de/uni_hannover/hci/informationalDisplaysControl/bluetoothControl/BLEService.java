@@ -1,6 +1,5 @@
 package de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
@@ -13,13 +12,11 @@ import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
@@ -39,8 +36,8 @@ public class BLEService extends Service {
     public final static String ACTION_GATT_SERVICES_DISCOVERED = "GATT_SERVICES_DISCOVERED";
     public final static String ACTION_DATA_AVAILABLE = "DATA_AVAILABLE";
 
-    private final static String TEST_SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
-    private final static String TEST_CHARACTERISTIC_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
+    private final static String SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
+    private final static String MODE_CHARACTERISTIC_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
     private final static String BUTTON_CHARACTERISTIC_UUID = "07bf0001-7a36-490f-ba53-345b3642a694";
 
     private static final int STATE_DISCONNECTED = 0;
@@ -84,7 +81,7 @@ public class BLEService extends Service {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                setCharacteristicNotification(bluetoothGatt.getService(UUID.fromString(TEST_SERVICE_UUID)).getCharacteristic(UUID.fromString(BUTTON_CHARACTERISTIC_UUID)), true);
+                setCharacteristicNotification(bluetoothGatt.getService(UUID.fromString(SERVICE_UUID)).getCharacteristic(UUID.fromString(BUTTON_CHARACTERISTIC_UUID)), true);
                 try {
                     Thread.sleep(200);
                 } catch (InterruptedException e) {
@@ -166,7 +163,7 @@ public class BLEService extends Service {
             Log.w("testbt", "BluetoothGatt not initialized");
             return;
         }
-        BluetoothGattCharacteristic characteristic = bluetoothGatt.getService(UUID.fromString(TEST_SERVICE_UUID)).getCharacteristic(UUID.fromString(TEST_CHARACTERISTIC_UUID));
+        BluetoothGattCharacteristic characteristic = bluetoothGatt.getService(UUID.fromString(SERVICE_UUID)).getCharacteristic(UUID.fromString(MODE_CHARACTERISTIC_UUID));
         bluetoothGatt.readCharacteristic(characteristic);
     }
 
@@ -179,7 +176,7 @@ public class BLEService extends Service {
         }
 
         byte[] value = data.getBytes(StandardCharsets.UTF_8);
-        BluetoothGattCharacteristic characteristic = bluetoothGatt.getService(UUID.fromString(TEST_SERVICE_UUID)).getCharacteristic(UUID.fromString(TEST_CHARACTERISTIC_UUID));
+        BluetoothGattCharacteristic characteristic = bluetoothGatt.getService(UUID.fromString(SERVICE_UUID)).getCharacteristic(UUID.fromString(MODE_CHARACTERISTIC_UUID));
         characteristic.setValue(value);
         bluetoothGatt.writeCharacteristic(characteristic);
     }
@@ -193,7 +190,7 @@ public class BLEService extends Service {
         }
 
         byte[] value = BigInteger.valueOf(data).toByteArray();
-        BluetoothGattCharacteristic characteristic = bluetoothGatt.getService(UUID.fromString(TEST_SERVICE_UUID)).getCharacteristic(UUID.fromString(TEST_CHARACTERISTIC_UUID));
+        BluetoothGattCharacteristic characteristic = bluetoothGatt.getService(UUID.fromString(SERVICE_UUID)).getCharacteristic(UUID.fromString(MODE_CHARACTERISTIC_UUID));
         characteristic.setValue(value);
         bluetoothGatt.writeCharacteristic(characteristic);
     }
@@ -208,7 +205,7 @@ public class BLEService extends Service {
         bluetoothGatt.setCharacteristicNotification(characteristic, enabled);
 
         // This is specific to Heart Rate Measurement.
-        if (TEST_CHARACTERISTIC_UUID.equals(characteristic.getUuid())) {
+        if (MODE_CHARACTERISTIC_UUID.equals(characteristic.getUuid())) {
             BluetoothGattDescriptor descriptor = characteristic.getDescriptor(UUID.fromString(SampleGattAttributes.CLIENT_CHARACTERISTIC_CONFIG));
             descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
             bluetoothGatt.writeDescriptor(descriptor);
@@ -256,7 +253,7 @@ public class BLEService extends Service {
         final Intent intent = new Intent(action);
         // This is special handling for the Heart Rate Measurement profile. Data
         // parsing is carried out as per profile specifications.
-        if (TEST_CHARACTERISTIC_UUID.equals(characteristic.getUuid().toString())) {
+        if (MODE_CHARACTERISTIC_UUID.equals(characteristic.getUuid().toString())) {
             final String testCharacteristic = characteristic.getStringValue(0);
             Log.i("testbt", String.format("Test characteristic: %s", testCharacteristic));
             intent.putExtra("CHAR_DATA", testCharacteristic);
@@ -287,7 +284,5 @@ public class BLEService extends Service {
         intentFilter.addAction(BLEService.ACTION_DATA_AVAILABLE);
         return intentFilter;
     }
-
-
 
 }

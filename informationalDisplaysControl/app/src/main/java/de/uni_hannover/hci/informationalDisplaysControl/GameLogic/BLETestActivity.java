@@ -78,7 +78,7 @@ public class BLETestActivity extends AppCompatActivity {
         writeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                bleService.writeCharacteristic(scanResultView.getText().toString());
+                bleService.writeCharacteristic(0x00);
             }
         });
 
@@ -251,6 +251,13 @@ public class BLETestActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         unregisterReceiver(gattUpdateReceiver);
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        bleService.close();
+        super.onDestroy();
     }
 
 }
