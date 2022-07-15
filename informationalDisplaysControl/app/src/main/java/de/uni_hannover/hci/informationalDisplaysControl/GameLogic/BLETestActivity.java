@@ -19,6 +19,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -70,6 +71,8 @@ public class BLETestActivity extends AppCompatActivity {
 
         connectButton = findViewById(R.id.connect);
         scanResultView = findViewById(R.id.results);
+        ImageView imageView = new ImageView(this);
+        imageView.setImageDrawable(getDrawable(R.drawable.bt_status_circle));
         statusCircle = findViewById(R.id.bleTestStatus);
         writeButton = findViewById(R.id.write);
         readButton = findViewById(R.id.read);
@@ -78,7 +81,8 @@ public class BLETestActivity extends AppCompatActivity {
         writeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                bleService.writeCharacteristic(0x00);
+                byte[] b = {0x00, 0x11};
+                //bleService.writeCharacteristic(b);
             }
         });
 
@@ -87,7 +91,7 @@ public class BLETestActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 scanResultView.setText("");
-                bleService.readCharacteristic();
+                //bleService.readCharacteristic();
             }
         });
 
@@ -226,9 +230,9 @@ public class BLETestActivity extends AppCompatActivity {
             } else if (BLEService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
                 //displayGattServices(bleService.getSupportedGattServices());
                 Log.i("testbt", "Services found:");
-                for(BluetoothGattService service: bleService.getSupportedGattServices()){
-                    Log.i("testbt", service.getUuid().toString());
-                }
+//                for(BluetoothGattService service: bleService.getSupportedGattServices()){
+//                    Log.i("testbt", service.getUuid().toString());
+//                }
             } else if (BLEService.ACTION_DATA_AVAILABLE.equals(action)) {
                 String result = intent.getStringExtra("CHAR_DATA");
                 Log.i("testbt", "Value: " + result);
@@ -256,7 +260,7 @@ public class BLETestActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        bleService.close();
+        bleService.closeAll();
         super.onDestroy();
     }
 

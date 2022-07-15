@@ -4,6 +4,8 @@
 #include <BLEServer.h>
 #include <string>
 
+
+
 // Check for bluetooth
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
@@ -25,8 +27,8 @@
 #define A_PIN 12
 #define B_PIN 16
 #define C_PIN 13
-#define D_PIN -1 // Hier Ground
-#define E_PIN -1 // required for 1/32 scan panels, like 64x64. Any available pin would do, i.e. IO32
+#define D_PIN -1 // GROUND
+#define E_PIN -1 // GROUND
 #define LAT_PIN 27
 #define OE_PIN 15
 #define CLK_PIN 14
@@ -42,13 +44,15 @@ uint16_t myRED = dma_display->color565(255, 0, 0);
 uint16_t myGREEN = dma_display->color565(0, 255, 0);
 uint16_t myBLUE = dma_display->color565(0, 0, 255);
 
+
 // Data for images
-
-
-// 0: apple, 1: key, 2: tree, 3: moon, 4: clock, 5: cactus, 6: earth, 7: yingyang, 8: lock, 9: lightning, 10:heart
+// 0: apple, 1: key, 2: tree, 3: moon, 4: clock, 5: cactus, 
+// 6: earth, 7: yingyang, 8: lock, 9: lightning, 10: heart, 
+// 11: bell, 12: cheries, 13: music, 14: question mark, 
+// 15: star, 17: ,    
 union iconCollection {
-  int ico[11][64] = {
-    {
+  int ico[16][64] = {
+    { // apple
       0, 0, 0, 0, 14593, 0, 0, 0, 
       0, 0, 0, 14593, 0, 0, 0, 0, 
       0, 53508, 63488, 14593, 63488, 63488, 0, 0, 
@@ -57,7 +61,7 @@ union iconCollection {
       43430, 53508, 63488, 63488, 63488, 63488, 63488, 0, 
       43430, 43430, 53508, 53508, 53508, 53508, 53508, 0, 
       0, 43430, 43430, 43430, 43430, 43430, 0, 0
-    },{
+    },{ // key
       0, 0, 59244, 65504, 65504, 0, 0, 0, 
       0, 59244, 0, 0, 0, 46533, 0, 0, 
       0, 59244, 0, 0, 0, 46533, 0, 0, 
@@ -66,7 +70,7 @@ union iconCollection {
       0, 0, 0, 65504, 65504, 0, 0, 0, 
       0, 0, 0, 65504, 0, 0, 0, 0, 
       0, 0, 0, 65504, 46533, 0, 0, 0 
-    },{
+    },{ // tree
       0, 0, 0, 13861, 15431, 0, 0, 0, 
       0, 0, 13861, 4064, 13861, 15431, 0, 0, 
       0, 0, 13861, 4064, 13861, 15431, 0, 0, 
@@ -75,7 +79,7 @@ union iconCollection {
       13861, 4064, 4064, 4064, 4064, 4064, 13861, 15431, 
       0, 0, 0, 33543, 20964, 0, 0, 0, 
       0, 0, 20964, 33543, 33543, 20964, 0, 0
-    },{
+    },{ // moon
       0, 0, 40179, 52889, 52889, 52889, 0, 0, 
       0, 40179, 52889, 40179, 0, 0, 52889, 0, 
       40179, 52889, 52889, 0, 0, 0, 0, 0, 
@@ -84,7 +88,7 @@ union iconCollection {
       40179, 52889, 52889, 40179, 0, 0, 0, 40179, 
       0, 40179, 52889, 52889, 52889, 52889, 40179, 0, 
       0, 0, 40179, 40179, 40179, 40179, 0, 0
-    },{
+    },{ // clock
       0, 0, 12696, 12696, 12696, 12696, 0, 0, 
       0, 12696, 52889, 63488, 52889, 52889, 12696, 0, 
       12696, 52889, 52889, 63488, 52889, 52889, 52889, 12696, 
@@ -93,7 +97,7 @@ union iconCollection {
       12696, 52889, 52889, 52889, 52889, 52889, 52889, 12696, 
       0, 12696, 52889, 52889, 52889, 52889, 12696, 0, 
       0, 0, 12696, 12696, 12696, 12696, 0, 0
-    },{
+    },{ // cactus
       0, 0, 0, 15431, 13861, 0, 0, 0, 
       0, 0, 0, 13861, 15431, 0, 0, 0, 
       0, 13861, 0, 13861, 13861, 0, 0, 0, 
@@ -102,7 +106,7 @@ union iconCollection {
       0, 0, 0, 15431, 13861, 0, 0, 0, 
       0, 64512, 64512, 64512, 64512, 64512, 48102, 0, 
       0, 0, 64512, 64512, 48102, 48102, 0, 0
-    },{
+    },{ // earth
       0, 0, 65535, 65535, 1503, 1503, 0, 0, 
       0, 15431, 1503, 15431, 1503, 1503, 65535, 0, 
       15431, 15431, 15431, 15431, 15431, 1503, 1503, 65535, 
@@ -111,7 +115,7 @@ union iconCollection {
       1503, 1503, 15431, 1503, 15431, 15431, 15431, 1503, 
       0, 1503, 1503, 1503, 15431, 15431, 15431, 0, 
       0, 0, 1503, 1503, 1503, 15431, 0, 0
-    },{
+    },{ // yingyang
       0, 0, 12696, 12696, 12696, 12696, 0, 0, 
       0, 12696, 12696, 12696, 12696, 12696, 12696, 0, 
       12696, 12696, 65535, 12696, 12696, 12696, 12696, 12696, 
@@ -120,7 +124,7 @@ union iconCollection {
       65535, 65535, 65535, 65535, 65535, 12696, 65535, 65535, 
       0, 65535, 65535, 65535, 65535, 65535, 65535, 0, 
       0, 0, 65535, 65535, 65535, 65535, 0, 0
-    },{
+    },{ // lock
       0, 0, 0, 0, 0, 0, 0, 0, 
       0, 0, 29614, 29614, 21130, 0, 0, 0, 
       0, 29614, 0, 0, 0, 21130, 0, 0, 
@@ -129,7 +133,7 @@ union iconCollection {
       46533, 65504, 65504, 10597, 65504, 65504, 46533, 0, 
       0, 46533, 65504, 65504, 65504, 46533, 0, 0, 
       0, 0, 46533, 46533, 46533, 0, 0, 0
-    },{
+    },{ // lightning
       0, 0, 46533, 65504, 65504, 46533, 0, 0, 
       0, 0, 65504, 65504, 46533, 0, 0, 0, 
       0, 46533, 65504, 46533, 0, 0, 0, 0, 
@@ -138,7 +142,7 @@ union iconCollection {
       0, 0, 0, 0, 65504, 46533, 0, 0, 
       0, 0, 0, 0, 65504, 0, 0, 0, 
       0, 0, 0, 65504, 0, 0, 0, 0
-    },{
+    },{ // heart
       0, 63488, 63488, 0, 0, 53508, 53508, 0, 
       63488, 63488, 63488, 63488, 63488, 53508, 53508, 53508, 
       63488, 63488, 63488, 63488, 63488, 63488, 53508, 53508, 
@@ -147,14 +151,62 @@ union iconCollection {
       0, 0, 63488, 63488, 63488, 53508, 0, 0, 
       0, 0, 0, 63488, 53508, 0, 0, 0, 
       0, 0, 0, 0, 0, 0, 0, 0
+    },{ // bell
+      0, 0, 0, 65504, 46533, 0, 0, 0, 
+      0, 0, 59244, 65504, 65504, 46533, 0, 0, 
+      0, 0, 59244, 65504, 65504, 46533, 0, 0, 
+      0, 0, 65504, 65504, 65504, 46533, 0, 0, 
+      0, 0, 65504, 65504, 65504, 46533, 0, 0, 
+      0, 65504, 65504, 65504, 65504, 65504, 65504, 0, 
+      0, 0, 0, 64512, 64512, 0, 0, 0, 
+      0, 0, 0, 0, 0, 0, 0, 0
+    },{ // cherries
+      0, 0, 0, 0, 15431, 15431, 15431, 15431, 
+      0, 0, 0, 15431, 15431, 0, 15431, 0, 
+      0, 0, 15431, 0, 0, 15431, 15431, 0, 
+      0, 15431, 15431, 0, 0, 63808, 63808, 0, 
+      0, 63808, 63808, 0, 63808, 64492, 64492, 63808, 
+      63808, 64492, 63808, 63808, 63808, 64492, 63808, 63808, 
+      63808, 64492, 63808, 63808, 0, 63808, 63808, 0, 
+      0, 63808, 63808, 0, 0, 0, 0, 0
+    },{ // music
+      0, 0, 0, 0, 10613, 10613, 10613, 10613, 
+      0, 0, 0, 0, 10613, 10613, 10613, 10613, 
+      0, 0, 0, 0, 10613, 0, 0, 0, 
+      0, 0, 0, 0, 10613, 0, 0, 0, 
+      0, 0, 0, 0, 10613, 0, 0, 0, 
+      0, 10613, 10613, 10613, 10613, 0, 0, 0, 
+      10613, 10613, 10613, 10613, 10613, 0, 0, 0, 
+      10613, 10613, 10613, 10613, 0, 0, 0, 0
+    },{ // question mark
+      0, 2110, 2110, 2110, 2110, 2110, 2110, 0, 
+      2110, 2110, 2110, 2110, 2110, 2110, 2110, 2110, 
+      2110, 2110, 0, 0, 0, 0, 2110, 2110, 
+      0, 0, 0, 0, 0, 0, 2110, 2110, 
+      0, 0, 0, 2110, 2110, 2110, 2110, 0, 
+      0, 0, 0, 2110, 2110, 0, 0, 0, 
+      0, 0, 0, 0, 0, 0, 0, 0, 
+      0, 0, 0, 2110, 2110, 0, 0, 0
+    },{ // star
+      0, 0, 0, 65504, 65504, 0, 0, 0, 
+      0, 0, 0, 65504, 65504, 0, 0, 0, 
+      65504, 65504, 65504, 65504, 65504, 65504, 65504, 65504, 
+      0, 65504, 65504, 65504, 65504, 65504, 65504, 0, 
+      0, 0, 65504, 65504, 65504, 65504, 0, 0, 
+      0, 65504, 65504, 65504, 65504, 65504, 65504, 0, 
+      0, 65504, 65504, 0, 0, 65504, 65504, 0, 
+      0, 65504, 0, 0, 0, 0, 65504, 0
     }
   };
 } icons;
 
 
+char* text;
+boolean drawing = false;
+TaskHandle_t handle_drawText;
+
 // Functions to controll LED MATRIX
-void drawText(char *text){
-    
+void drawText(void * pvParameters){  
   // init text parameters
   int font_size = 2;
   dma_display->setTextSize(font_size); // size 1 == 8 pixels high
@@ -171,6 +223,25 @@ void drawText(char *text){
     }
     delay(30);
     dma_display->fillScreen(dma_display->color444(0, 0, 0));
+  }
+  drawing = false;
+  vTaskDelete(NULL);
+}
+
+void startDrawingThread(char* t){
+  if(!drawing){
+    drawing = true;
+    text = t;  
+    //handle_drawText = new TaskHandle_t;
+    
+    xTaskCreatePinnedToCore(
+      drawText, // function to be executed
+      "drawingTask", // name of Task
+      6000, // stack size
+      NULL, // pointer to parameters
+      0, // priority
+      &handle_drawText, // taskHandle
+      0); // core 
   }
 }
 
@@ -269,9 +340,8 @@ char* intToByteArray(int n, bool onebyte){
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("Characteristic defined! Now you can read it in your phone!");
 
-  // INIT LED MATRIX ------------------------------------------------------------------------------------------------------------------------
+  // INIT LED MATRIX --------------------------------------------------------------------------------------
   HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
   HUB75_I2S_CFG mxconfig(
     PANEL_RES_X,   // module width
@@ -288,11 +358,13 @@ void setup() {
   dma_display->begin();
   dma_display->setBrightness8(200); //0-255
   dma_display->clearScreen();
-  drawText("Welcome!");
   
-  // INIT BLUETOOTH -------------------------------------------------------------------------------------------------------------------------
-    // Setup device
-  BLEDevice::init("LED MATRIX");
+  // Print "Welcome!" on LED matrix
+  startDrawingThread("Welcome!");
+  
+  // INIT BLUETOOTH ---------------------------------------------------------------------------------------
+  // Setup device
+  BLEDevice::init("LED MATRIX_1");
   uint16_t mtu = 128;
   BLEDevice::setMTU(mtu);
   BLEServer *pServer = BLEDevice::createServer();
@@ -319,49 +391,67 @@ void setup() {
 }
 
 // --------------------------------------------------------------------------------------------------------
-// STATE MACHINE ------------------------------------------------------------------------------------------
+// STATE MACHINE ------------------------------------------------------------------------------------------ 
+
+char prev_MODE = '0';
+char MODE = '0';
+boolean painting = false;
 
 void loop() {
-  // TODO: REMOVE "- 48" later
-  uint8_t MODE = modeCharacteristic->getValue()[0] - 48;
-  Serial.println(appendCharToCharArray("Mode: ", MODE));
+  if (!deviceConnected){
+    modeCharacteristic->setValue("0");
+  }
+
+  // Get current mode
+  prev_MODE = MODE;
+  MODE = modeCharacteristic->getValue()[0];
+  
+  // If mode changed, stop drawing text task
+  if (prev_MODE != MODE) {
+    // vTaskDelete(handle_drawText);
+    painting = false;
+  }
+  
+  // STATE MACHINE - START --------------------------------------------------------------------------------
   // PAIRING MODE - No device connected in this state
-  if (MODE == 0){
+  if (MODE == '0'){
     if(deviceConnected){
       modeCharacteristic->setValue("1");
       return;
     }
-    Serial.println("m0:");
-    drawText("Ready to connect...");
+    startDrawingThread("Ready to connect...");
   }
   // CONNECTED, BUT NOT READY YET - Not all devices connected, no game chosen, etc.
-  else if (MODE == 1){
-    Serial.println("m1:");
-    drawText("Connected!");
+  else if (MODE == '1'){
+    Serial.println("m1");
+    startDrawingThread("Connected!");
   }
-  // WHO AM I
-  else if (MODE == 2){
-    Serial.println("m2:");
+  // WHO AM I & Send Text
+  else if (MODE == '2'){
+    Serial.println("m2");
+    char* name = (char*) dataCharacteristic->getValue().data();
+    startDrawingThread(name);
   }
   // HOT PIXELS 
-  else if (MODE == 3){
-    Serial.println("m3:");
+  else if (MODE == '3'){
+    Serial.println("m3");
   }
   // DRAWING AND GUESSING - Montagsmaler
-  else if (MODE == 4){
-    Serial.println("m4:");
+  else if (MODE == '4'){
+    Serial.println("m4");
   }
   // DOBBLE
-  else if (MODE == 5){
-    Serial.println("m5:");
-    int ic[] = {0, 1, 2, 3, 4, 5, 6, 7};
-    drawIcons(ic, 8);
-  }
-  // SEND TEXT
-  else if (MODE == 6){
-    
+  else if (MODE == '5'){
+    Serial.println("m5");
+    if(!drawing && !painting){
+      int ic[] = {8, 9, 10, 11, 12, 13, 14, 15};
+      drawIcons(ic, 8);
+      painting = true;
+    }
   }
 
+  // Code example to check button state
+  /*
   if(deviceConnected && digitalRead(buttonPin)){
     char* buttonState = "1";
     buttonCharacteristic->setValue(buttonState);
@@ -369,7 +459,8 @@ void loop() {
     delay(50);
     buttonCharacteristic->setValue("0");
   }
-  delay(50);
+  */
+  delay(200);
 
 
 }

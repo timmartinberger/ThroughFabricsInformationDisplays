@@ -1,9 +1,15 @@
 package de.uni_hannover.hci.informationalDisplaysControl;
 
+import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
+import android.bluetooth.le.BluetoothLeScanner;
+import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanResult;
 import android.content.Intent;
 import android.net.MacAddress;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -21,6 +27,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 
 import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.Devices;
@@ -28,18 +35,22 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 
 public class DeviceList extends AppCompatActivity {
-    //widgets
-    Button btnPaired;
-    Button btnGo;
-    ListView devicelist;
+
+    // Widgets
+    private Button btnUpdate;
+    private Button btnGo;
+    private ListView devicelist;
+
     //Bluetooth
     private BluetoothAdapter myBluetooth = null;
-    private Set<BluetoothDevice> pairedDevices;
+    private Set<BluetoothDevice> devices;
 
-    // For intents to forward data of devices to connect to
-    public static final String EXTRA_NAMES = "NAMES";
-    public static final String EXTRA_ADDRESSES = "ADRESSES";
-
+    // Scanning
+    private BluetoothLeScanner bluetoothLeScanner;
+    private static final long SCAN_PERIOD = 3000;
+    private ScanCallback leScanCallback;
+    private boolean scanning;
+    private Handler scanHandler = new Handler();
 
     @RequiresApi(api = Build.VERSION_CODES.S)
     @Override
@@ -48,11 +59,14 @@ public class DeviceList extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_list);
 
-        //Calling widgets
-        btnPaired = (Button)findViewById(R.id.update);
+        // Widgets
+        btnUpdate = (Button)findViewById(R.id.update);
         devicelist = (ListView)findViewById(R.id.listView);
         btnGo = (Button)findViewById(R.id.select);
 
+
+
+        // Permissions ----------------------------------------------
         // Check for BT permissions
         ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
             if (isGranted) {
@@ -63,7 +77,7 @@ public class DeviceList extends AppCompatActivity {
         });
 
         // BT permissions for Android 12 or higher
-        String[] BT_PERMISSIONS =  {android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_SCAN};
+        String[] BT_PERMISSIONS = {android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_SCAN};
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
             if(!EasyPermissions.hasPermissions(this, BT_PERMISSIONS)){
@@ -72,11 +86,12 @@ public class DeviceList extends AppCompatActivity {
 
         }
 
-        // Get BT adapter for the phones device
+        // Get BT adapter for the phones device ---------------------
         myBluetooth = BluetoothAdapter.getDefaultAdapter();
+        bluetoothLeScanner = myBluetooth.getBluetoothLeScanner();
         if(myBluetooth == null) {
             //Show a mensag. that the device has no bluetooth adapter
-            Toast.makeText(getApplicationContext(), "Bluetooth Device Not Available", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Bluetooth device not available!", Toast.LENGTH_LONG).show();
 
             //finish apk
             finish();
@@ -86,11 +101,20 @@ public class DeviceList extends AppCompatActivity {
                 startActivityForResult(turnBTon,1);
         }
 
+        // Scan Callback --------------------------------------------
+        leScanCallback = new ScanCallback() {
+            @Override
+            public void onScanResult(int callbackType, ScanResult result) {
+                super.onScanResult(callbackType, result);
+                devices.add(result.getDevice());
+            }
+        };
+
         // Handle click on "update devices" button
-        btnPaired.setOnClickListener(new View.OnClickListener() {
+        btnUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                pairedDevicesList();
+                scanBLEDevices();
             }
         });
 
@@ -98,28 +122,51 @@ public class DeviceList extends AppCompatActivity {
         btnGo.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-
                 // Make an intent to start next activity.
                 Intent i = new Intent(DeviceList.this, GameMenu.class);
-
-                //Change the activity.
-//                i.putExtra(EXTRA_ADDRESSES, Devices.deviceAddress); //this will be received at ledControl (class) Activity
                 startActivity(i);
             }
         });
 
+        // Start scanning
+        scanBLEDevices();
     }
 
-    private void pairedDevicesList() {
-        pairedDevices = myBluetooth.getBondedDevices();
+    // Scanning ------------------------------------------------------------------------------------
+    @SuppressLint("MissingPermission")
+    private void scanBLEDevices() {
+        if (!scanning) {
+            // Stops scanning after a predefined scan period.
+            ProgressDialog progress = ProgressDialog.show(this, "Searching for devices...", "Please wait!");  //show a progress dialog
+            devices = new HashSet<>();
+            scanHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    scanning = false;
+                    bluetoothLeScanner.stopScan(leScanCallback);
+                    progress.dismiss();
+                    updateList();
+                }
+            }, SCAN_PERIOD);
+
+            scanning = true;
+            bluetoothLeScanner.startScan(leScanCallback);
+        } else {
+            scanning = false;
+            bluetoothLeScanner.stopScan(leScanCallback);
+        }
+    }
+
+    private void updateList() {
         ArrayList list = new ArrayList();
 
-        if (pairedDevices.size()>0) {
-            for(BluetoothDevice bt : pairedDevices) {
-                list.add(bt.getName() + "\n" + bt.getAddress()); //Get the device's name and the address
+        if (devices.size()>0) {
+            for(BluetoothDevice bt : devices) {
+                if (bt.getName() != null)
+                    list.add(bt.getName() + "\n" + bt.getAddress()); //Get the device's name and the address
             }
         } else {
-            Toast.makeText(getApplicationContext(), "No Paired Bluetooth Devices Found.", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "No devices found!", Toast.LENGTH_LONG).show();
         }
 
         final ArrayAdapter adapter = new ArrayAdapter(this,android.R.layout.simple_list_item_multiple_choice, list);
