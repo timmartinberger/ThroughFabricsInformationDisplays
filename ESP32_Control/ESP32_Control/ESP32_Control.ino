@@ -49,24 +49,16 @@ void drawText(char *text){
   Serial.print("Länge des Strings: ");
   Serial.println(strlen(text));
   int shifts = font_size * (strlen(text) * 5 + strlen(text)); // 5 for width of a single letter
-  Serial.print("Shift: ");
-  Serial.print(shifts);
   for (int s = 0; s < 32 + shifts; s++){
     dma_display->setCursor(32 - s, 1);
     for (w=0; w<strlen(text); w++) {
       dma_display->setTextColor(dma_display->color444(50, 100, 200));
       dma_display->print(text[w]);
     }
-    delay(35);
+    delay(30);
     dma_display->fillScreen(dma_display->color444(0, 0, 0));
   }
-  /*
-  dma_display->println();
-  for (w=9; w<18; w++) {
-    dma_display->setTextColor(dma_display->color444(155, 155, 0));
-    dma_display->print("*");
-  }
-  */
+
 }
 // BT stuff
 BluetoothSerial SerialBT;
@@ -82,14 +74,13 @@ void setup() {
     _pins
   );
 
- // mxconfig.gpio.e = 18;
   mxconfig.clkphase = false;
   mxconfig.driver = HUB75_I2S_CFG::FM6126A;
 
   // Display Setup
   dma_display = new MatrixPanel_I2S_DMA(mxconfig);
   dma_display->begin();
-  dma_display->setBrightness8(90); //0-255
+  dma_display->setBrightness8(180); //0-255
   dma_display->clearScreen();
 
 
@@ -101,7 +92,7 @@ void setup() {
 
 char *str = "ESP32";
  int half_sun [50] = {
-      0x0000, 0x0000, 0x0000, 0xffe0, 0x0000, 0x0000, 0xffe0, 0x0000, 0x0000, 0x0000,
+      0x00ff, 0x0000ff, 0x0000, 0xffe0, 0x0000, 0x0000, 0xffe0, 0x0000, 0x0000, 0x0000,
       0x0000, 0xffe0, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0xffe0, 0x0000,
       0x0000, 0x0000, 0x0000, 0xffe0, 0xffe0, 0xffe0, 0xffe0, 0x0000, 0x0000, 0x0000,
       0xffe0, 0x0000, 0xffe0, 0xffe0, 0xffe0, 0xffe0, 0xffe0, 0xffe0, 0x0000, 0xffe0,
@@ -149,11 +140,11 @@ void loop() {
   dma_display->fillScreen(dma_display->color444(0, 0, 0));
   drawText(str);
   readBT();
-  delay(100);
-
-  /*
+  delay(50);
+/*
+  
   dma_display->fillScreen(dma_display->color444(0, 0, 0));
-  dma_display->drawIcon(half_sun, 11, 11, 10, 5);
+  dma_display->drawIcon(half_sun, 0, 5, 10, 5);
   delay(5000);
   */
 }

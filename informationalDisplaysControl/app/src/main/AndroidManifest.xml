@@ -28,9 +28,10 @@
             android:exported="false" />
         <activity
             android:name=".GameMenu"
-            android:label="@string/title_activity_game_menu"></activity>
+            android:label="@string/title_activity_game_menu" />
         <activity
             android:name=".GameLogic.WhoAmI"
+            android:label="@string/who_am_i"
             android:exported="false" />
         <activity
             android:name=".SplashScreen"
@@ -44,10 +45,10 @@
         </activity>
         <activity
             android:name=".DeviceList"
-            android:label="@string/bluetooth_devices"></activity>
+            android:label="@string/bluetooth_devices" />
         <activity
-            android:name=".GameLogic.sendText"
-            android:label="LED Control" />
+            android:name=".GameLogic.SendText"
+            android:label="Send Text" />
     </application>
 
 </manifest>

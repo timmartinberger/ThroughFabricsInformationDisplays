@@ -1,12 +1,11 @@
 package de.uni_hannover.hci.informationalDisplaysControl.GameLogic;
 
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import de.uni_hannover.hci.informationalDisplaysControl.Devices;
+import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.*;
 import de.uni_hannover.hci.informationalDisplaysControl.R;
 
-import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -14,12 +13,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class WhoAmI extends AppCompatActivity {
 
@@ -78,7 +75,10 @@ public class WhoAmI extends AppCompatActivity {
     }
 
     private void sendNamesToDevices(ArrayList<String> nameList) {
-        //TODO implement sending info to devices
+        for(int i = 0; i < nameList.size(); i++){
+            BluetoothConnection btconn = new BluetoothConnection();
+            btconn.sendText(Devices.getMacAsString(i), nameList.get(i), this);
+        }
     }
 
     // Fast way to call Toast

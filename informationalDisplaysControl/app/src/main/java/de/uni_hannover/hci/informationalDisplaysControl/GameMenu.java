@@ -1,7 +1,6 @@
 package de.uni_hannover.hci.informationalDisplaysControl;
 
 import android.annotation.SuppressLint;
-import android.os.Build;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -34,7 +33,7 @@ public class GameMenu extends AppCompatActivity {
         gameList.add(new Game(getString(R.string.hot_pixels), "", null, DobbleController.class));
         gameList.add(new Game(getString(R.string.drawing_guessing), "", null, null));
         gameList.add(new Game(getString(R.string.four_wins), "", null, null));
-        gameList.add(new Game(getString(R.string.send_text), "Send a any text to the LED Matrices", null, sendText.class));
+        gameList.add(new Game(getString(R.string.send_text), "Send a any text to the LED Matrices", null, SendText.class));
 
 
         GameAdapter gameAdapter = new GameAdapter(this, gameList);

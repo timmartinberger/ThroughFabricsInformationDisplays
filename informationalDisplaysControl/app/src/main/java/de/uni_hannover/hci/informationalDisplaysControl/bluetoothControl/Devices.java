@@ -1,4 +1,4 @@
-package de.uni_hannover.hci.informationalDisplaysControl;
+package de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl;
 import android.net.MacAddress;
 
 import androidx.appcompat.app.AppCompatActivity;
