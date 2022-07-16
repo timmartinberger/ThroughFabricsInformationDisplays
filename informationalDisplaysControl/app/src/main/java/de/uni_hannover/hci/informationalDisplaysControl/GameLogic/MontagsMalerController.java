@@ -166,7 +166,8 @@ public class MontagsMalerController extends AppCompatActivity {
     }
 
     public void fillBoard(View view) {
-        actionList.add(new DrawAction(null, getBoardState(), null));
+        DrawAction oldState = new DrawAction(null, getBoardState(), null);
+        actionList.add(oldState);
         fillBoardWithColor(selectedColor);
     }
 
@@ -180,6 +181,7 @@ public class MontagsMalerController extends AppCompatActivity {
                 pixel.setTag(new DrawAction(oldState.position, oldState.boardState, color));
             }
         }
+        notifyBT(new DrawAction(null, getBoardState(), null));
     }
 
     private DrawingColor[] getBoardState() {
@@ -206,28 +208,33 @@ public class MontagsMalerController extends AppCompatActivity {
         }
     }
 
-    private void notifyPixel(DrawAction action) {
+    private byte[] byteFromPixel(DrawAction action) {
         byte bytePosX = (byte)(action.position.second & 0xFF);
         byte bytePosY = (byte)(action.position.first & 0xFF);
         byte byteColor = (byte)(action.color.getColorCode() & 0xFF);
-        byte[] array = {bytePosX, bytePosY, byteColor};
-        try {
-            BLEServiceInstance.getBLEService().writeCharacteristic(Devices.getMacAsString(0), BLEService.DATA_CHARACTERISTIC_UUID, array);
-        } catch (Exception e) {
-            System.out.println("device not connected?");
-        }
+        return new byte[]{bytePosX, bytePosY, byteColor};
     }
 
-    private void notifyBoard() {
+    private byte[] byteFromBoard(DrawAction action) {
+        byte[] array = new byte[100];
+        for(int i = 0; i < array.length; i++) {
+            array[i] = (byte) (action.boardState[i].getColorValue() & 0xFF);
+        }
+        return array;
 
     }
 
     private void notifyBT(DrawAction action) {
-        if(action.boardState != null && action.boardState.length == 100) {
-            notifyBoard();
+        byte[] array;
+        if (action.boardState != null && action.boardState.length == 100) {
+            array = byteFromBoard(action);
+        } else {
+           array = byteFromPixel(action);
         }
-        else {
-            notifyPixel(action);
+        try {
+            BLEServiceInstance.getBLEService().writeCharacteristic(Devices.getMacAsString(0), BLEService.DATA_CHARACTERISTIC_UUID, array);
+        } catch (Exception e) {
+            System.out.println("device not connected?");
         }
     }
 }
