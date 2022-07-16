@@ -5,6 +5,7 @@ import de.uni_hannover.hci.informationalDisplaysControl.R;
 import de.uni_hannover.hci.informationalDisplaysControl.baseData.DrawingColor;
 import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.BLEService;
 import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.BLEServiceInstance;
+import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.Devices;
 
 
 import android.graphics.Color;
@@ -207,9 +208,14 @@ public class MontagsMalerController extends AppCompatActivity {
 
     private void notifyPixel(DrawAction action) {
         byte bytePosX = (byte)(action.position.first & 0xFF);
-        byte bytePosy = (byte)(action.position.first & 0xFF);
+        byte bytePosY = (byte)(action.position.first & 0xFF);
         byte byteColor = (byte)(action.color.getColorCode() & 0xFF);
-        //BLEServiceInstance.getBLEService().w
+        byte[] array = {bytePosX, bytePosY, byteColor};
+        try {
+            BLEServiceInstance.getBLEService().writeCharacteristic(Devices.getMacAsString(0), BLEService.DATA_CHARACTERISTIC_UUID, array);
+        } catch (Exception e) {
+            System.out.println("device not connected?");
+        }
     }
 
     private void notifyBoard() {
