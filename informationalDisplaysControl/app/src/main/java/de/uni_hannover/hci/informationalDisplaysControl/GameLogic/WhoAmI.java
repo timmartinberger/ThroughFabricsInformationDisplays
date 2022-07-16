@@ -62,10 +62,13 @@ public class WhoAmI extends AppCompatActivity {
     }
 
     private ArrayList<String> generateNameList(int numberOfPlayers) {
+        ArrayList<String> copyAllNames = new ArrayList<>(this.allNames);
         ArrayList<String> nameList = new ArrayList<>();
         Random random = new Random();
         for(int i = 0; i < numberOfPlayers; i ++) {
-            nameList.add(this.allNames.get(random.nextInt(this.allNames.size())));
+            String name = copyAllNames.get(random.nextInt(copyAllNames.size()));
+            nameList.add(name);
+            copyAllNames.remove(name);
         }
         return nameList;
     }

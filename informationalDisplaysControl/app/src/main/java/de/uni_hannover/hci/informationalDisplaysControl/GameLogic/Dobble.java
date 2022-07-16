@@ -50,12 +50,14 @@ public class Dobble {
      */
 
     private void playingMatch(int rounds) {
-        Symbol curentSymbol;
+        Symbol currentSymbol;
         ArrayList<ArrayList<Symbol>> playersSymbols;
-        //ArrayList<Symbol> copySymbols;
+        //round loop
         for(int i = 0; i < rounds; i++) {
-            curentSymbol = getRoundSymbol();
-            playersSymbols = getPlayersSymbols(curentSymbol);
+
+            currentSymbol = getRoundSymbol();
+            //init player display
+            playersSymbols = getPlayersSymbols(currentSymbol);
             int player = 0;
             System.out.println("Round " + i + ":");
             for(ArrayList<Symbol> list : playersSymbols) {
@@ -64,6 +66,16 @@ public class Dobble {
             }
             System.out.println("+++++++++++++++++++");
 
+            try {
+                Thread.sleep(60000);
+            } catch (InterruptedException e) {
+                // button pressed
+            }
+            //send currentSymbol to all players
+
+            //get signal
+
+            //repeat game
         }
     }
 
@@ -71,11 +83,11 @@ public class Dobble {
         return symbolList.get(random.nextInt(symbolList.size()));
     }
 
-    private ArrayList<ArrayList<Symbol>> getPlayersSymbols(Symbol curentSymbol) {
+    private ArrayList<ArrayList<Symbol>> getPlayersSymbols(Symbol currentSymbol) {
 
         ArrayList<ArrayList<Symbol>>  playersSymbols = new ArrayList<>();
         ArrayList<Symbol> copySymbols = new ArrayList<>(symbolList);
-        copySymbols.remove(curentSymbol);
+        copySymbols.remove(currentSymbol);
         Symbol sym;
         for(int players = 0; players < numberOfPlayers; players++) {
             ArrayList<Symbol> symbols = new ArrayList<>();
@@ -84,7 +96,7 @@ public class Dobble {
                 copySymbols.remove(sym);
                 symbols.add(sym);
             }
-            symbols.add(curentSymbol);
+            symbols.add(currentSymbol);
             Collections.shuffle(symbols);
             playersSymbols.add(symbols);
         }

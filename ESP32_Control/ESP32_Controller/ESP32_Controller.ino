@@ -359,7 +359,7 @@ void setup() {
   // Display Setup
   dma_display = new MatrixPanel_I2S_DMA(mxconfig);
   dma_display->begin();
-  dma_display->setBrightness8(200); //0-255
+  dma_display->setBrightness8(120); //0-255
   dma_display->clearScreen();
   
   // Print "Welcome!" on LED matrix
@@ -382,7 +382,7 @@ void setup() {
   
   // Data characteristic 
   dataCharacteristic = pService->createCharacteristic(DATA_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE);
-  dataCharacteristic->setValue("0");
+  dataCharacteristic->setValue("");
   
   // Button characteristic
   buttonCharacteristic = pService->createCharacteristic(BUTTON_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_NOTIFY);
@@ -412,7 +412,9 @@ void loop() {
   // If mode changed, stop drawing text task
   if (prev_MODE != MODE) {
     // vTaskDelete(handle_drawText);
+    dataCharacteristic->setValue("");
     painting = false;
+    dma_display->clearScreen();
   }
   
   // STATE MACHINE - START --------------------------------------------------------------------------------
@@ -442,7 +444,10 @@ void loop() {
   // DRAWING AND GUESSING - Montagsmaler
   else if (MODE == '4'){
     Serial.println("m4");
-    dma_display->fillScreen(WHITE);
+    if (!drawing && !painting){
+      dma_display->fillRect(10, 3, 10, 10, dma_display->color444(15, 15, 15));
+      painting = true;
+    }
     
   }
   // DOBBLE
@@ -472,7 +477,7 @@ void loop() {
     buttonCharacteristic->setValue("0");
   }
   */
-  delay(200);
+  delay(100);
 
 
 }

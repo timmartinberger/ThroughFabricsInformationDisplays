@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
@@ -51,8 +52,7 @@ public class GameMenu extends AppCompatActivity {
 
         gameList.add(new Game(getString(R.string.who_am_i), "This is a guessing game where players use yes or no questions to guess the identity of a famous person or fictional character.", getDrawable(R.drawable.whoami_darker), WhoAmI.class));
         gameList.add(new Game(getString(R.string.dobble), "", null, DobbleController.class));
-        gameList.add(new Game(getString(R.string.drawing_guessing), "", null, null));
-        gameList.add(new Game(getString(R.string.four_wins), "", null, null));
+        gameList.add(new Game(getString(R.string.drawing_guessing), "", null, MontagsMalerController.class));
         gameList.add(new Game(getString(R.string.send_text), "Send a any text to the LED Matrices", null, SendText.class));
         gameList.add(new Game("BLETest", "", null, BLETestActivity.class));
 
@@ -69,10 +69,6 @@ public class GameMenu extends AppCompatActivity {
         serviceBound = this.bindService(gattServiceIntent, BLEServiceInstance.serviceConnection, Context.BIND_AUTO_CREATE);
 
     }
-
-
-
-
 
     // Benachrichtigungen über Verbindungsstatus vom BLEService empfangen --------------------------
     private final BroadcastReceiver gattUpdateReceiver = new BroadcastReceiver() {
