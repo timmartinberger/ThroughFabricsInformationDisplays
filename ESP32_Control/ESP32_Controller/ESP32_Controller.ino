@@ -52,9 +52,9 @@ int colors[] = {63488, 2110, 65504, 64512, 59608, 16968, 4064, 14593, 65535, 150
 // 0: apple, 1: key, 2: tree, 3: moon, 4: clock, 5: cactus, 
 // 6: earth, 7: yingyang, 8: lock, 9: lightning, 10: heart, 
 // 11: bell, 12: cheries, 13: music, 14: question mark, 
-// 15: star, 17: ,    
+// 15: star, 16: beer,    
 union iconCollection {
-  int ico[16][64] = {
+  int ico[17][64] = {
     { // apple
       0, 0, 0, 0, 14593, 0, 0, 0, 
       0, 0, 0, 14593, 0, 0, 0, 0, 
@@ -199,6 +199,15 @@ union iconCollection {
       0, 65504, 65504, 65504, 65504, 65504, 65504, 0, 
       0, 65504, 65504, 0, 0, 65504, 65504, 0, 
       0, 65504, 0, 0, 0, 0, 65504, 0
+    },{ // beer
+      0, 0, 0, 65535, 65535, 65535, 65535, 0, 
+      0, 0, 65535, 65535, 65535, 65535, 65535, 65535, 
+      0, 0, 26139, 65535, 64512, 65535, 64512, 26139, 
+      0, 26139, 26139, 64512, 64512, 64512, 64512, 26139, 
+      26139, 0, 26139, 64512, 64512, 60779, 64512, 26139, 
+      26139, 0, 26139, 60779, 64512, 64512, 64512, 26139, 
+      0, 26139, 26139, 64512, 64512, 64512, 60779, 26139, 
+      0, 0, 26139, 26139, 26139, 26139, 26139, 26139
     }
   };
 } icons;
@@ -368,7 +377,7 @@ void setup() {
   // INIT BLUETOOTH ---------------------------------------------------------------------------------------
   // Setup device
   BLEDevice::init("LED MATRIX_1");
-  uint16_t mtu = 128;
+  uint16_t mtu = 256;
   BLEDevice::setMTU(mtu);
   BLEServer *pServer = BLEDevice::createServer();
   pServer->setCallbacks(new ServerCallbacks());
@@ -413,6 +422,7 @@ void loop() {
   if (prev_MODE != MODE) {
     // vTaskDelete(handle_drawText);
     dataCharacteristic->setValue("");
+    buttonCharacteristic->setValue("");
     painting = false;
     dma_display->clearScreen();
   }
@@ -445,8 +455,25 @@ void loop() {
   else if (MODE == '4'){
     Serial.println("m4");
     if (!drawing && !painting){
-      dma_display->fillRect(10, 3, 10, 10, dma_display->color444(15, 15, 15));
+      dma_display->fillRect(11, 3, 10, 10, dma_display->color444(15, 15, 15));
       painting = true;
+    } else if (painting && !drawing){
+      char* data = (char*) dataCharacteristic->getValue().data();
+      Serial.println("Data:");
+      Serial.println((uint8_t) data[3]);
+      if (sizeof(data) == 4){
+        int16_t x_pos = ((int16_t)0x00 << 8) | data[0];
+        int16_t y_pos = ((int16_t)0x00 << 8) | data[1];
+        uint16_t color = colors[((int16_t)0x00 << 8) | data[2]];
+        dma_display->drawPixel(x_pos + 11, y_pos + 3, color);
+      } else {
+        Serial.println("Elseteil");
+        int img[100];
+        for (int i = 0; i < 100; i++){
+          img[i] = ((int16_t)0x00 << 8) | data[i];
+        }
+        dma_display->drawIcon(img, 11, 3, 10, 10);
+      }
     }
     
   }
@@ -454,7 +481,7 @@ void loop() {
   else if (MODE == '5'){
     Serial.println("m5");
     if(!drawing && !painting){
-      int ic[] = {0, 1, 2, 3, 4, 5, 6, 7};
+      int ic[] = {0, 1, 2, 3, 4, 5, 6, 16};
       drawIcons(ic, 8);
       painting = true;
     }

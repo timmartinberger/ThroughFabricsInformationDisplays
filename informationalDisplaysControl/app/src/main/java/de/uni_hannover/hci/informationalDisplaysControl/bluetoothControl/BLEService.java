@@ -207,7 +207,7 @@ public class BLEService extends Service {
         }
     }
 
-    // write int value
+    // write byte value
     @SuppressLint("MissingPermission")
     public void writeCharacteristic(String mac, String characteristicUUID, byte[] data) {
         BluetoothGatt gatt = getGattByMAC(mac);
@@ -218,6 +218,7 @@ public class BLEService extends Service {
 
         BluetoothGattCharacteristic characteristic = gatt.getService(UUID.fromString(SERVICE_UUID)).getCharacteristic(UUID.fromString(characteristicUUID));
         characteristic.setValue(data);
+        Log.i("testbt", "writeByteArray: " + data.length + " " +  data.toString());
         gatt.writeCharacteristic(characteristic);
     }
 
