@@ -133,7 +133,7 @@ public class MontagsMalerController extends AppCompatActivity {
     }
 
     public void clearBoard(View view) {
-        fillBoardWithColor(Color.WHITE);
+        fillBoardWithColor(DrawingColor.WHITE);
     }
 
     public void revertAction(View view) {
@@ -166,15 +166,17 @@ public class MontagsMalerController extends AppCompatActivity {
 
     public void fillBoard(View view) {
         actionList.add(new DrawAction(null, getBoardState(), null));
-        fillBoardWithColor(selectedColor.getColorValue());
+        fillBoardWithColor(selectedColor);
     }
 
-    private void fillBoardWithColor(int color) {
+    private void fillBoardWithColor(DrawingColor color) {
         for(int i = 0; i < table.getChildCount(); i++) {
             TableRow row = (TableRow) table.getChildAt(i);
             for(int j = 0; j < row.getChildCount(); j++) {
                 ImageView pixel = (ImageView) row.getChildAt(j);
-                pixel.setColorFilter(color);
+                pixel.setColorFilter(color.getColorValue());
+                DrawAction oldState = (DrawAction) pixel.getTag();
+                pixel.setTag(new DrawAction(oldState.position, oldState.boardState, color));
             }
         }
     }
@@ -207,6 +209,7 @@ public class MontagsMalerController extends AppCompatActivity {
         byte bytePosX = (byte)(action.position.first & 0xFF);
         byte bytePosy = (byte)(action.position.first & 0xFF);
         byte byteColor = (byte)(action.color.getColorCode() & 0xFF);
+        //BLEServiceInstance.getBLEService().w
     }
 
     private void notifyBoard() {
