@@ -3,6 +3,8 @@ package de.uni_hannover.hci.informationalDisplaysControl.GameLogic;
 import androidx.appcompat.app.AppCompatActivity;
 import de.uni_hannover.hci.informationalDisplaysControl.R;
 import de.uni_hannover.hci.informationalDisplaysControl.baseData.DrawingColor;
+import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.BLEService;
+import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.BLEServiceInstance;
 
 
 import android.graphics.Color;
@@ -43,6 +45,8 @@ public class MontagsMalerController extends AppCompatActivity {
 
         initTable();
         initColors();
+
+        BLEServiceInstance.getBLEService().writeCharacteristicToAll(BLEService.MODE_CHARACTERISTIC_UUID, "4");
 
         toBeDrawn.setText("Pepe");
         toBeDrawn.setTextSize(24);
