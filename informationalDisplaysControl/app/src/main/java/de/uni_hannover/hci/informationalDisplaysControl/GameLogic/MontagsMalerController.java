@@ -77,7 +77,10 @@ public class MontagsMalerController extends AppCompatActivity {
         pixelObject.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                actionList.add(action);
+                DrawAction oldState = (DrawAction)pixelObject.getTag();
+                actionList.add(oldState);
+                DrawAction newState = new DrawAction(oldState.position, oldState.boardState, selectedColor);
+                pixelObject.setTag(newState);
                 pixelObject.setColorFilter(selectedColor.getColorValue());
                 notifyBT(action);
             }
