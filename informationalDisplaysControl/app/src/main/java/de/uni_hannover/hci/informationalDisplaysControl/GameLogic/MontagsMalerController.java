@@ -87,7 +87,7 @@ public class MontagsMalerController extends AppCompatActivity {
                 DrawAction newState = new DrawAction(oldState.position, oldState.boardState, selectedColor);
                 pixelObject.setTag(newState);
                 pixelObject.setColorFilter(selectedColor.getColorValue());
-                notifyBT(action);
+                notifyBT(newState);
             }
         });
         return pixelObject;
@@ -207,7 +207,7 @@ public class MontagsMalerController extends AppCompatActivity {
     }
 
     private void notifyPixel(DrawAction action) {
-        byte bytePosX = (byte)(action.position.first & 0xFF);
+        byte bytePosX = (byte)(action.position.second & 0xFF);
         byte bytePosY = (byte)(action.position.first & 0xFF);
         byte byteColor = (byte)(action.color.getColorCode() & 0xFF);
         byte[] array = {bytePosX, bytePosY, byteColor};

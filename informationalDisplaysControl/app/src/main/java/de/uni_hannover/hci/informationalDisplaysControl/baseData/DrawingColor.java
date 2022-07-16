@@ -62,7 +62,8 @@ public enum DrawingColor {
                 return 4;
             case BROWN:
                 return 7;
+            default:
+                return 8;
         }
-        return 8;
     }
 }
