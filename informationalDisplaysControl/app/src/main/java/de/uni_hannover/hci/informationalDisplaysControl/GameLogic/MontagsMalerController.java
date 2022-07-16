@@ -217,8 +217,9 @@ public class MontagsMalerController extends AppCompatActivity {
 
     private byte[] byteFromBoard(DrawAction action) {
         byte[] array = new byte[100];
+        System.out.println(array.length);
         for(int i = 0; i < array.length; i++) {
-            array[i] = (byte) (action.boardState[i].getColorValue() & 0xFF);
+            array[i] = (byte)(action.boardState[i].getColorCode() & 0xFF);
         }
         return array;
 
