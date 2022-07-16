@@ -209,13 +209,14 @@ public class BLEService extends Service {
 
     // write int value
     @SuppressLint("MissingPermission")
-    public void writeCharacteristic(byte[] data, BluetoothGatt gatt) {
+    public void writeCharacteristic(String mac, String characteristicUUID, byte[] data) {
+        BluetoothGatt gatt = getGattByMAC(mac);
         if (bluetoothAdapter == null || gatt == null) {
             Log.w("testbt", "BluetoothAdapter not initialized");
             return;
         }
 
-        BluetoothGattCharacteristic characteristic = gatt.getService(UUID.fromString(SERVICE_UUID)).getCharacteristic(UUID.fromString(MODE_CHARACTERISTIC_UUID));
+        BluetoothGattCharacteristic characteristic = gatt.getService(UUID.fromString(SERVICE_UUID)).getCharacteristic(UUID.fromString(characteristicUUID));
         characteristic.setValue(data);
         gatt.writeCharacteristic(characteristic);
     }
