@@ -3,7 +3,7 @@
 
     <!--  Game Names  -->
     <string name="who_am_i">Who am I?</string>
-    <string name="hot_pixels">Hot Pixels</string>
+    <string name="dobble">Dobble</string>
     <string name="four_wins">Connect 4</string>
     <string name="send_text">Send Text</string>
     <string name="drawing_guessing">Drawing and Guessing</string>

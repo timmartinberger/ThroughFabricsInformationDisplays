@@ -38,11 +38,14 @@ MatrixPanel_I2S_DMA *dma_display = nullptr;
 // Button Pin
 const int buttonPin = 25; 
 
-uint16_t myBLACK = dma_display->color565(0, 0, 0);
-uint16_t myWHITE = dma_display->color565(255, 255, 255);
-uint16_t myRED = dma_display->color565(255, 0, 0);
-uint16_t myGREEN = dma_display->color565(0, 255, 0);
-uint16_t myBLUE = dma_display->color565(0, 0, 255);
+uint16_t BLACK = dma_display->color565(0, 0, 0);
+uint16_t WHITE = dma_display->color565(255, 255, 255);
+uint16_t RED = dma_display->color565(255, 0, 0);
+uint16_t GREEN = dma_display->color565(0, 255, 0);
+uint16_t BLUE = dma_display->color565(0, 0, 255);
+
+// colors: 0: red , 1: blau, 2: yellow, 3: orange, 4: magenta, 5: dark grey, 6: green, 7: brown, 8: white 9: light blue
+int colors[] = {63488, 2110, 65504, 64512, 59608, 16968, 4064, 14593, 65535, 1503};
 
 
 // Data for images
@@ -439,14 +442,23 @@ void loop() {
   // DRAWING AND GUESSING - Montagsmaler
   else if (MODE == '4'){
     Serial.println("m4");
+    dma_display->fillScreen(WHITE);
+    
   }
   // DOBBLE
   else if (MODE == '5'){
     Serial.println("m5");
     if(!drawing && !painting){
-      int ic[] = {8, 9, 10, 11, 12, 13, 14, 15};
+      int ic[] = {0, 1, 2, 3, 4, 5, 6, 7};
       drawIcons(ic, 8);
       painting = true;
+    }
+    if(deviceConnected && digitalRead(buttonPin)){
+      char* buttonState = "1";
+      buttonCharacteristic->setValue(buttonState);
+      buttonCharacteristic->notify(); 
+      delay(50);
+      buttonCharacteristic->setValue("0");
     }
   }
 

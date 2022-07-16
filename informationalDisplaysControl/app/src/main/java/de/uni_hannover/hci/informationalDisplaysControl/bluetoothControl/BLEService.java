@@ -29,10 +29,9 @@ public class BLEService extends Service {
 
     private Binder binder = new LocalBinder();
     private BluetoothAdapter bluetoothAdapter;
-    // private BluetoothGatt bluetoothGatt;
 
     public ArrayList<BluetoothGatt> bluetoothGatts;
-    private ArrayList<BluetoothGattCallback> gattCallbacks;
+    public ArrayList<Integer> connectionState;
 
     // connection state
     public final static String ACTION_GATT_CONNECTED = "GATT_CONNECTED";
@@ -40,15 +39,14 @@ public class BLEService extends Service {
     public final static String ACTION_GATT_SERVICES_DISCOVERED = "GATT_SERVICES_DISCOVERED";
     public final static String ACTION_DATA_AVAILABLE = "DATA_AVAILABLE";
 
-    private final static String SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
-    private final static String MODE_CHARACTERISTIC_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
-    private final static String DATA_CHARACTERISTIC_UUID = "84e3a48f-7172-4952-8e59-64af6ce20583";
-    private final static String BUTTON_CHARACTERISTIC_UUID = "07bf0001-7a36-490f-ba53-345b3642a694";
+    public final static String SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
+    public final static String MODE_CHARACTERISTIC_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
+    public final static String DATA_CHARACTERISTIC_UUID = "84e3a48f-7172-4952-8e59-64af6ce20583";
+    public final static String BUTTON_CHARACTERISTIC_UUID = "07bf0001-7a36-490f-ba53-345b3642a694";
 
     private static final int STATE_DISCONNECTED = 0;
     private static final int STATE_CONNECTED = 2;
 
-    private int connectionState;
 
 
 
@@ -57,10 +55,9 @@ public class BLEService extends Service {
         @SuppressLint("MissingPermission")
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-            Log.i("testbt", "CONNECTION_STATE_CHANGE: "+ newState);
+            Log.i("testbt", "CONNECTION_STATE_CHANGE: state:"+ newState + " status:" + status);
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 // successfully connected to the GATT Server
-                connectionState = STATE_CONNECTED;
                 broadcastUpdate(ACTION_GATT_CONNECTED, gatt);
                 // discover services after connection
                 try {
@@ -71,7 +68,6 @@ public class BLEService extends Service {
                 gatt.discoverServices();
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 // disconnected from the GATT Server
-                connectionState = STATE_DISCONNECTED;
                 broadcastUpdate(ACTION_GATT_DISCONNECTED, gatt);
             }
         }
@@ -147,7 +143,7 @@ public class BLEService extends Service {
         try {
             Log.i("testbt", "Device address: " + address);
             final BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
-            BluetoothGatt bluetoothGatt = device.connectGatt(this, true, bluetoothGattCallback);
+            BluetoothGatt bluetoothGatt = device.connectGatt(this, true, bluetoothGattCallback, BluetoothDevice.TRANSPORT_LE);
             if (bluetoothGatts == null){
                 bluetoothGatts = new ArrayList<BluetoothGatt>();
             }
@@ -179,16 +175,36 @@ public class BLEService extends Service {
 
     // write string value
     @SuppressLint("MissingPermission")
-    public void writeCharacteristic(String data, BluetoothGatt gatt) {
+    public void writeCharacteristic(String mac, String characteristicUUID, String data) {
+        BluetoothGatt gatt = getGattByMAC(mac);
         if (bluetoothAdapter == null || gatt == null) {
             Log.w("testbt", "BluetoothAdapter not initialized");
             return;
         }
 
         byte[] value = data.getBytes(StandardCharsets.UTF_8);
-        BluetoothGattCharacteristic characteristic = gatt.getService(UUID.fromString(SERVICE_UUID)).getCharacteristic(UUID.fromString(MODE_CHARACTERISTIC_UUID));
+        BluetoothGattCharacteristic characteristic = gatt.getService(UUID.fromString(SERVICE_UUID)).getCharacteristic(UUID.fromString(characteristicUUID));
         characteristic.setValue(value);
         gatt.writeCharacteristic(characteristic);
+    }
+
+    @SuppressLint("MissingPermission")
+    public void writeCharacteristicToAll(String characteristicUUID, String data) {
+        if (bluetoothGatts == null || bluetoothGatts.size() == 0){
+            Log.w("testbt", "GATTs not initialized");
+            return;
+        }
+        for (BluetoothGatt gatt: bluetoothGatts) {
+            if (bluetoothAdapter == null || gatt == null) {
+                Log.w("testbt", "BluetoothAdapter not initialized");
+                return;
+            }
+
+            byte[] value = data.getBytes(StandardCharsets.UTF_8);
+            BluetoothGattCharacteristic characteristic = gatt.getService(UUID.fromString(SERVICE_UUID)).getCharacteristic(UUID.fromString(characteristicUUID));
+            characteristic.setValue(value);
+            gatt.writeCharacteristic(characteristic);
+        }
     }
 
     // write int value
@@ -238,7 +254,6 @@ public class BLEService extends Service {
     // Service/BLE-Verbindung beenden --------------------------------------------------------------
     @Override
     public boolean onUnbind(Intent intent) {
-        closeAll();
         return super.onUnbind(intent);
     }
 
@@ -259,27 +274,32 @@ public class BLEService extends Service {
     // Activities benachrichtigen ------------------------------------------------------------------
     private void broadcastUpdate(final String action, BluetoothGatt gatt) {
         final Intent intent = new Intent(action);
-        intent.putExtra("CHAR_DATA", gatt.getDevice().getAddress());
+        intent.putExtra("ADDRESS", gatt.getDevice().getAddress());
         sendBroadcast(intent);
     }
 
     private void broadcastUpdate(final String action, final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
         final Intent intent = new Intent(action);
+        intent.putExtra("ADDRESS", gatt.getDevice().getAddress());
         // If data ist from mode characteristic
         if (MODE_CHARACTERISTIC_UUID.equals(characteristic.getUuid().toString())) {
             final String mode = characteristic.getStringValue(0);
             Log.i("testbt", String.format("MODE: %s", mode));
-            intent.putExtra("CHAR_DATA", gatt.getDevice().getAddress() + "#" + mode);
+            intent.putExtra("MODE_DATA", mode);
+        }
+        // Data from data characteristic
+        else if (DATA_CHARACTERISTIC_UUID.equals((characteristic.getUuid().toString()))){
+
         }
         // If data is from button characteristic
         else if (BUTTON_CHARACTERISTIC_UUID.equals(characteristic.getUuid().toString())) {
             final String data = characteristic.getStringValue(0);
             if (data.equals("1")) {
-                intent.putExtra("CHAR_DATA", "BUTTON_PRESSED");
+                intent.putExtra("BUTTON_DATA", "PRESSED");
                 Log.i("testbt", "BUTTON PRESSED!");
             }
             else {
-                intent.putExtra("CHAR_DATA", "BUTTON_NOT_PRESSED");
+                intent.putExtra("BUTTON_DATA", "NOT_PRESSED");
                 Log.i("testbt", "BUTTON NOT PRESSED!");
             }
         } else {
@@ -308,6 +328,9 @@ public class BLEService extends Service {
     // Getter for gatts
     public BluetoothGatt getGattByMAC(String mac){
         Log.i("testbt", mac);
+        if (bluetoothGatts == null){
+            return null;
+        }
         for (BluetoothGatt gatt: bluetoothGatts){
             if (mac.equals(gatt.getDevice().getAddress())) return gatt;
         }

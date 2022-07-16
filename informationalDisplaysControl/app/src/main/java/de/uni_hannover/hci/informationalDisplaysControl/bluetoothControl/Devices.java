@@ -12,6 +12,8 @@ public class Devices {
     private static int countDevices = 0;
 
 
+
+
     public static void addDevice(String name, MacAddress address) throws Exception {
         if (deviceNames == null) {
             deviceNames = new ArrayList<String>();

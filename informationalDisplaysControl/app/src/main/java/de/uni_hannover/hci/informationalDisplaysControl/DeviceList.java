@@ -47,7 +47,7 @@ public class DeviceList extends AppCompatActivity {
 
     // Scanning
     private BluetoothLeScanner bluetoothLeScanner;
-    private static final long SCAN_PERIOD = 3000;
+    private static final long SCAN_PERIOD = 2000;
     private ScanCallback leScanCallback;
     private boolean scanning;
     private Handler scanHandler = new Handler();

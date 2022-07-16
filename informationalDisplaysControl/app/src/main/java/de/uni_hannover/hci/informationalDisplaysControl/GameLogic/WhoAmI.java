@@ -4,6 +4,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.*;
 import de.uni_hannover.hci.informationalDisplaysControl.R;
 
+import android.bluetooth.BluetoothGattService;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -21,12 +25,18 @@ import java.util.stream.Collectors;
 public class WhoAmI extends AppCompatActivity {
 
     List<String> allNames = new ArrayList<>();
-
+    private boolean serviceBound;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_who_am_i);
+
+        // Bind service
+        Intent gattServiceIntent = new Intent(this, BLEService.class);
+        serviceBound = this.bindService(gattServiceIntent, BLEServiceInstance.serviceConnection, Context.BIND_AUTO_CREATE);
+
+        BLEServiceInstance.getBLEService().writeCharacteristicToAll(BLEService.MODE_CHARACTERISTIC_UUID, "2");
         initNameList();
     }
 
@@ -71,15 +81,93 @@ public class WhoAmI extends AppCompatActivity {
         }
     }
 
+    // todo delete
+    // standardBT connection
+//    private void sendNamesToDevices(ArrayList<String> nameList) {
+//        for(int i = 0; i < nameList.size(); i++){
+//            BluetoothConnection btconn = new BluetoothConnection();
+//            btconn.sendText(Devices.getMacAsString(i), nameList.get(i), this);
+//        }
+//    }
+
+
     private void sendNamesToDevices(ArrayList<String> nameList) {
         for(int i = 0; i < nameList.size(); i++){
-            BluetoothConnection btconn = new BluetoothConnection();
-            btconn.sendText(Devices.getMacAsString(i), nameList.get(i), this);
+            BLEServiceInstance.getBLEService().writeCharacteristic(Devices.getMacAsString(i), BLEService.DATA_CHARACTERISTIC_UUID, nameList.get(i));
         }
     }
+
 
     // Fast way to call Toast
     private void msg(String s) {
         Toast.makeText(getApplicationContext(),s,Toast.LENGTH_LONG).show();
     }
+
+
+    // Benachrichtigungen über Verbindungsstatus vom BLEService empfangen --------------------------
+    private final BroadcastReceiver gattUpdateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            Log.i("testbt", "Broadcastreceiver got notification: " + action);
+            String address = intent.getStringExtra("ADDRESS");
+            // todo remove?
+            if (BLEService.ACTION_GATT_CONNECTED.equals(action)) {
+
+            }
+            else if (BLEService.ACTION_GATT_DISCONNECTED.equals(action)) {
+                Toast.makeText(getApplicationContext(), address + " disconnected!", Toast.LENGTH_LONG).show();
+            }
+            else if (BLEService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
+                Log.i("testbt", "Services found:");
+
+                List<BluetoothGattService> services = BLEServiceInstance.getBLEService().getSupportedGattServices(BLEServiceInstance.getBLEService().getGattByMAC(address));
+                for (BluetoothGattService service: services){
+                    if (service.getUuid().toString().equals(BLEService.SERVICE_UUID)){
+                        Toast.makeText(getApplicationContext(), address + " connected!", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                }
+                Toast.makeText(getApplicationContext(), "Device with address " + address + " is not compatible!", Toast.LENGTH_LONG).show();
+                finish();
+            }
+            else if (BLEService.ACTION_DATA_AVAILABLE.equals(action)) {
+                Bundle bundle = intent.getExtras();
+                if (bundle != null) {
+                    for (String key : bundle.keySet()) {
+                        Log.e("testbt", key + " : " + (bundle.get(key) != null ? bundle.get(key) : "NULL"));
+                    }
+                }
+            }
+        }
+    };
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(gattUpdateReceiver, BLEService.makeGattUpdateIntentFilter());
+//        if (bleService != null) {
+//            final boolean result = bleService.connect(ESP1Address);
+//            Log.i("testbt", "Connect request result=" + result);
+//        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(gattUpdateReceiver);
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        Log.i("testbt", "servConn: " + BLEServiceInstance.serviceConnection.toString());
+        if (serviceBound){
+            this.unbindService(BLEServiceInstance.serviceConnection);
+            serviceBound = false;
+        }
+        super.onDestroy();
+    }
+
+
 }
