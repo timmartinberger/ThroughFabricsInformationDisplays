@@ -11,5 +11,4 @@ import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.Devices
 
 public class MontagsMaler {
 
-
 }

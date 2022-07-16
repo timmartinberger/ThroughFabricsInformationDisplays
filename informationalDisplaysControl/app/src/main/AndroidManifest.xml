@@ -25,6 +25,7 @@
         android:theme="@style/AppMainTheme" >
         <activity
             android:name=".GameLogic.MontagsMalerController"
+            android:label="Drawing and Guessing"
             android:exported="false" />
         <activity
             android:name=".GameLogic.DobbleController"
