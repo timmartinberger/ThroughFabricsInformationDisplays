@@ -25,7 +25,7 @@ public class MontagsMalerController extends AppCompatActivity {
     private LinearLayout colorBar;
     private TableLayout table;
     private ImageButton fillButton;
-    private ArrayList<DrawingColor> colorList = new ArrayList<>();
+    private final ArrayList<DrawingColor> colorList = new ArrayList<>();
     private DrawingColor selectedColor = DrawingColor.WHITE;
     private TextView toBeDrawn;
     private final ArrayList<DrawAction> actionList = new ArrayList<>();
@@ -69,20 +69,17 @@ public class MontagsMalerController extends AppCompatActivity {
         return colorObject;
     }
 
-    private ImageView generatePixelElement(Pair<Integer, Integer> position) {
+    private ImageView generatePixelElement(DrawAction action) {
         ImageView pixelObject = new ImageView(this);
         pixelObject.setImageDrawable(getDrawable(R.drawable.pixel_object));
-        TableRow.LayoutParams params = new TableRow.LayoutParams(
-                TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT);
-        params.setMargins(4,4,4,4);
-        //pixelObject.setLayoutParams(params);
         pixelObject.setPadding(4, 4, 4, 4);
-        pixelObject.setTag(position);
+        pixelObject.setTag(action);
         pixelObject.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                actionList.add(new DrawAction((Pair<Integer, Integer>) pixelObject.getTag(), pixelObject.getColorFilter(), null));
+                actionList.add(action);
                 pixelObject.setColorFilter(selectedColor.getColorValue());
+                notifyBT(action);
             }
         });
         return pixelObject;
@@ -92,7 +89,7 @@ public class MontagsMalerController extends AppCompatActivity {
         for(int i = 0; i < 10; i++) {
             TableRow row = new TableRow(this);
             for(int j = 0; j < 10; j++) {
-                row.addView(generatePixelElement(new Pair<Integer, Integer>(i, j)));
+                row.addView(generatePixelElement(new DrawAction(new Pair<Integer, Integer>(i,j), null, DrawingColor.WHITE)));
             }
             table.addView(row);
         }
@@ -145,22 +142,23 @@ public class MontagsMalerController extends AppCompatActivity {
         else {
             TableRow row = (TableRow) table.getChildAt(action.position.first);
             ImageView pixel = (ImageView) row.getChildAt(action.position.second);
-            pixel.setColorFilter(action.color);
+            pixel.setColorFilter(action.color.getColorValue());
         }
+        notifyBT(action);
     }
 
-    private void resetBoardState(ColorFilter[] boardState) {
+    private void resetBoardState(DrawingColor[] boardState) {
         for(int i = 0; i < table.getChildCount(); i++) {
             TableRow row = (TableRow) table.getChildAt(i);
             for(int j = 0; j < row.getChildCount(); j++) {
                 ImageView pixel = (ImageView) row.getChildAt(j);
-                pixel.setColorFilter(boardState[10*i +j]);
+                pixel.setColorFilter(boardState[10*i +j].getColorValue());
             }
         }
     }
 
     public void fillBoard(View view) {
-        actionList.add(new DrawAction(null, null, getBoardState()));
+        actionList.add(new DrawAction(null, getBoardState(), null));
         fillBoardWithColor(selectedColor.getColorValue());
     }
 
@@ -174,13 +172,14 @@ public class MontagsMalerController extends AppCompatActivity {
         }
     }
 
-    private ColorFilter[] getBoardState() {
-        ColorFilter[] boardState = new ColorFilter[100];
+    private DrawingColor[] getBoardState() {
+        DrawingColor[] boardState = new DrawingColor[100];
         for(int i = 0; i < table.getChildCount(); i++) {
             TableRow row = (TableRow) table.getChildAt(i);
             for(int j = 0; j < row.getChildCount(); j++) {
                 ImageView pixel = (ImageView) row.getChildAt(j);
-                boardState[i*10 + j] = pixel.getColorFilter();
+                DrawAction action = (DrawAction)pixel.getTag();
+                boardState[i*10 + j] = action.color;
             }
         }
         return boardState;
@@ -188,13 +187,31 @@ public class MontagsMalerController extends AppCompatActivity {
 
     public static class DrawAction {
         public Pair<Integer, Integer> position;
-        public ColorFilter color;
-        public ColorFilter[] boardState;
-        public DrawAction(Pair<Integer, Integer> position, ColorFilter color, ColorFilter[] boardState) {
+        public DrawingColor color;
+        public DrawingColor[] boardState;
+        public DrawAction(Pair<Integer, Integer> position, DrawingColor[] boardState, DrawingColor color) {
             this.position = position;
-            this.color = color;
             this.boardState = boardState;
+            this.color = color;
         }
     }
 
+    private void notifyPixel(DrawAction action) {
+        byte bytePosX = (byte)(action.position.first & 0xFF);
+        byte bytePosy = (byte)(action.position.first & 0xFF);
+        byte byteColor = (byte)(action.color.getColorCode() & 0xFF);
+    }
+
+    private void notifyBoard() {
+
+    }
+
+    private void notifyBT(DrawAction action) {
+        if(action.boardState != null && action.boardState.length == 100) {
+            notifyBoard();
+        }
+        else {
+            notifyPixel(action);
+        }
+    }
 }
