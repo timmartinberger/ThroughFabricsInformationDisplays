@@ -64,6 +64,12 @@ public class Dobble {
             currentSymbol = getRoundSymbol();
             //init player display
             playersSymbols = getPlayersSymbols(currentSymbol);
+            try {
+                //Thread.sleep(60000);
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                // button pressed, continue
+            }
             sendToPlayers(playersSymbols, deviceMacList);
             //sendToPlayers(singleSymbolList(currentSymbol), deviceMacList);
             System.out.println("Round " + i + ":");
@@ -71,15 +77,15 @@ public class Dobble {
             System.out.println("+++++++++++++++++++");
             try {
                 //Thread.sleep(60000);
-                Thread.sleep(6000);
+                Thread.sleep(10000);
             } catch (InterruptedException e) {
                 // button pressed, continue
             }
             //send currentSymbol to all players
-            //sendToPlayers(singleSymbolList(currentSymbol), deviceMacList);
+            sendToPlayers(singleSymbolList(currentSymbol), deviceMacList);
             //get signal
             try {
-                Thread.sleep(6000);
+                Thread.sleep(10000);
             } catch (Exception e) {
                 // button pressed, continue
             }
@@ -149,6 +155,11 @@ public class Dobble {
                     System.out.print(b + " ");
                 }
                 BLEServiceInstance.getBLEService().writeCharacteristic(deviceMacList.get(playerNr), BLEService.MODE_CHARACTERISTIC_UUID, "6");
+                try {
+                    Thread.sleep(100);
+                } catch (Exception e) {
+
+                }
                 BLEServiceInstance.getBLEService().writeCharacteristic(deviceMacList.get(playerNr), BLEService.DATA_CHARACTERISTIC_UUID, data);
             } catch (Exception e) {
                 System.out.println("Failed sending!");
