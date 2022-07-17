@@ -35,10 +35,9 @@ public class Dobble {
     }
 
     public void startGame() {
-        int rounds = 3;
         System.out.println("Number of symbols: " + symbolList.size());
         System.out.println("----------------------------");
-        playingMatch(rounds);
+        playingMatch();
     }
 
     /*
@@ -54,7 +53,7 @@ public class Dobble {
         9. nächste Runde...
      */
 
-    private void playingMatch(int rounds) {
+    private void playingMatch() {
         ArrayList<String> deviceMacList = new ArrayList<>();
         ArrayList<ArrayList<Symbol>> playersSymbols;
         Symbol currentSymbol;
@@ -66,7 +65,7 @@ public class Dobble {
             //init player display
             playersSymbols = getPlayersSymbols(currentSymbol);
             sendToPlayers(playersSymbols, deviceMacList);
-
+            //sendToPlayers(singleSymbolList(currentSymbol), deviceMacList);
             System.out.println("Round " + i + ":");
 
             System.out.println("+++++++++++++++++++");
@@ -77,7 +76,7 @@ public class Dobble {
                 // button pressed, continue
             }
             //send currentSymbol to all players
-            sendToPlayers(singleSymbolList(currentSymbol), deviceMacList);
+            //sendToPlayers(singleSymbolList(currentSymbol), deviceMacList);
             //get signal
             try {
                 Thread.sleep(6000);
@@ -144,7 +143,13 @@ public class Dobble {
         for(ArrayList<Symbol> list : playersSymbols) {
             //printSymbolArray(list, playerNr);
             try {
-                BLEServiceInstance.getBLEService().writeCharacteristic(deviceMacList.get(playerNr), BLEService.DATA_CHARACTERISTIC_UUID, getSymbolBytes(playersSymbols.get(playerNr)));
+                byte[] data = getSymbolBytes(playersSymbols.get(playerNr));
+                System.out.println(data.length);
+                for(byte b : data) {
+                    System.out.print(b + " ");
+                }
+                BLEServiceInstance.getBLEService().writeCharacteristic(deviceMacList.get(playerNr), BLEService.MODE_CHARACTERISTIC_UUID, "6");
+                BLEServiceInstance.getBLEService().writeCharacteristic(deviceMacList.get(playerNr), BLEService.DATA_CHARACTERISTIC_UUID, data);
             } catch (Exception e) {
                 System.out.println("Failed sending!");
             }

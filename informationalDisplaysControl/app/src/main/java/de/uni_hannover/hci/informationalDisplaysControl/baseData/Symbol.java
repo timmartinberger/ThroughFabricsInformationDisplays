@@ -94,8 +94,9 @@ public enum Symbol {
                 return 26;
             case GARBAGE:
                 return 27;
+            default:
+                return 0;
         }
-        return -1;
     }
 }
 
