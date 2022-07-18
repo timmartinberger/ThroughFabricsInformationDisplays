@@ -1,7 +1,9 @@
 package de.uni_hannover.hci.informationalDisplaysControl.GameLogic;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import de.uni_hannover.hci.informationalDisplaysControl.R;
+import de.uni_hannover.hci.informationalDisplaysControl.Utils;
 import de.uni_hannover.hci.informationalDisplaysControl.baseData.DrawingColor;
 import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.BLEService;
 import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.BLEServiceInstance;
@@ -48,6 +50,8 @@ public class MontagsMalerController extends AppCompatActivity {
         initColors();
 
         BLEServiceInstance.getBLEService().writeCharacteristicToAll(BLEService.MODE_CHARACTERISTIC_UUID, "4");
+        OnBackPressedCallback endMMCallback = Utils.endGameCallback(this);
+        this.getOnBackPressedDispatcher().addCallback(this, endMMCallback);
 
         toBeDrawn.setText("Pepe");
         toBeDrawn.setTextSize(24);

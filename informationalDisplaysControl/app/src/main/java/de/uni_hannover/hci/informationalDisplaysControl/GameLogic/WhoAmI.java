@@ -1,6 +1,9 @@
 package de.uni_hannover.hci.informationalDisplaysControl.GameLogic;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
+
+import de.uni_hannover.hci.informationalDisplaysControl.Utils;
 import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.*;
 import de.uni_hannover.hci.informationalDisplaysControl.R;
 
@@ -37,6 +40,9 @@ public class WhoAmI extends AppCompatActivity {
         serviceBound = this.bindService(gattServiceIntent, BLEServiceInstance.serviceConnection, Context.BIND_AUTO_CREATE);
 
         BLEServiceInstance.getBLEService().writeCharacteristicToAll(BLEService.MODE_CHARACTERISTIC_UUID, "2");
+        OnBackPressedCallback endWhoAmICallback = Utils.endGameCallback(this);
+        this.getOnBackPressedDispatcher().addCallback(this, endWhoAmICallback);
+
         initNameList();
     }
 

@@ -9,14 +9,25 @@
         <item name="android:checkMarkTint">@android:color/white</item>
         <item name="android:scrollbarThumbVertical">@android:color/white</item>
         <item name="android:buttonStyle">@style/ButtonStyle</item>
+        <item name="buttonBarNegativeButtonStyle">@style/NegativeButtonStyle</item>
+        <item name="buttonBarPositiveButtonStyle">@style/PositiveButtonStyle</item>
+
     </style>
 
     <style name="ButtonStyle"  parent="android:Widget.Button">
         <item name="android:textColor">@color/dark_grey</item>
         <item name="android:fontFamily">sans-serif</item>
-        <item name="android:textAllCaps">True</item>
+        <item name="android:textAllCaps">true</item>
         <item name="android:background">@color/mid_red</item>
         <item name="android:minHeight">50dp</item>
+    </style>
+
+    <style name="NegativeButtonStyle" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+        <item name="android:textColor">@color/almost_white</item>
+    </style>
+
+    <style name="PositiveButtonStyle" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+        <item name="android:textColor">@color/almost_white</item>
     </style>
 
 </resources>

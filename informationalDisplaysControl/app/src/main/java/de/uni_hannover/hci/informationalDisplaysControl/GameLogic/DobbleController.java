@@ -1,7 +1,9 @@
 package de.uni_hannover.hci.informationalDisplaysControl.GameLogic;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import de.uni_hannover.hci.informationalDisplaysControl.R;
+import de.uni_hannover.hci.informationalDisplaysControl.Utils;
 import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.BLEService;
 import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.BLEServiceInstance;
 
@@ -18,6 +20,8 @@ public class DobbleController extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dobble);
         BLEServiceInstance.getBLEService().writeCharacteristicToAll(BLEService.MODE_CHARACTERISTIC_UUID, "5");
+        OnBackPressedCallback endDobbleCallback = Utils.endGameCallback(this);
+        this.getOnBackPressedDispatcher().addCallback(this, endDobbleCallback);
     }
 
     private Dobble initGame(int i) {
