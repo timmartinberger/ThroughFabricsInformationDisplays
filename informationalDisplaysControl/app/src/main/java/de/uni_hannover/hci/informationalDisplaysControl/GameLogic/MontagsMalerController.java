@@ -34,6 +34,7 @@ public class MontagsMalerController extends AppCompatActivity {
     private DrawingColor selectedColor = DrawingColor.WHITE;
     private TextView toBeDrawn;
     private final ArrayList<DrawAction> actionList = new ArrayList<>();
+    private DrawingColor[] rootState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +49,7 @@ public class MontagsMalerController extends AppCompatActivity {
 
         initTable();
         initColors();
-
+        this.rootState = getBoardState();
         BLEServiceInstance.getBLEService().writeCharacteristicToAll(BLEService.MODE_CHARACTERISTIC_UUID, "4");
         OnBackPressedCallback endMMCallback = Utils.endGameCallback(this);
         this.getOnBackPressedDispatcher().addCallback(this, endMMCallback);
@@ -138,12 +139,15 @@ public class MontagsMalerController extends AppCompatActivity {
     }
 
     public void clearBoard(View view) {
+        actionList.add(new DrawAction(null, getBoardState(), null));
         fillBoardWithColor(DrawingColor.WHITE);
     }
 
     public void revertAction(View view) {
         int last = actionList.size()-1;
         if(last < 0) {
+            resetBoardState(rootState);
+            notifyBT(new DrawAction(null, rootState, null));
             return;
         }
         DrawAction action = actionList.get(last);
@@ -155,6 +159,8 @@ public class MontagsMalerController extends AppCompatActivity {
             TableRow row = (TableRow) table.getChildAt(action.position.first);
             ImageView pixel = (ImageView) row.getChildAt(action.position.second);
             pixel.setColorFilter(action.color.getColorValue());
+            DrawAction oldState = (DrawAction) pixel.getTag();
+            pixel.setTag(new DrawAction(oldState.position, oldState.boardState, action.color));
         }
         notifyBT(action);
     }
@@ -165,13 +171,14 @@ public class MontagsMalerController extends AppCompatActivity {
             for(int j = 0; j < row.getChildCount(); j++) {
                 ImageView pixel = (ImageView) row.getChildAt(j);
                 pixel.setColorFilter(boardState[10*i +j].getColorValue());
+                DrawAction oldState = (DrawAction) pixel.getTag();
+                pixel.setTag(new DrawAction(oldState.position, oldState.boardState, boardState[10*i +j]));
             }
         }
     }
 
     public void fillBoard(View view) {
-        DrawAction oldState = new DrawAction(null, getBoardState(), null);
-        actionList.add(oldState);
+        actionList.add(new DrawAction(null, getBoardState(), null));
         fillBoardWithColor(selectedColor);
     }
 
@@ -213,17 +220,17 @@ public class MontagsMalerController extends AppCompatActivity {
     }
 
     private byte[] byteFromPixel(DrawAction action) {
-        byte bytePosX = (byte)(action.position.second & 0xFF);
-        byte bytePosY = (byte)(action.position.first & 0xFF);
-        byte byteColor = (byte)(action.color.getColorCode() & 0xFF);
+        byte bytePosX = (byte)((action.position.second+1) & 0xFF);
+        byte bytePosY = (byte)((action.position.first+1) & 0xFF);
+        byte byteColor = (byte)((action.color.getColorCode()+1) & 0xFF);
         return new byte[]{bytePosX, bytePosY, byteColor};
     }
 
     private byte[] byteFromBoard(DrawAction action) {
         byte[] array = new byte[100];
         System.out.println(array.length);
-        for(int i = 0; i < array.length; i++) {
-            array[i] = (byte)(action.boardState[i].getColorCode() & 0xFF);
+        for(int i = 0; i < action.boardState.length; i++) {
+            array[i] = (byte)((action.boardState[i].getColorCode()+1) & 0xFF);
         }
         return array;
 
