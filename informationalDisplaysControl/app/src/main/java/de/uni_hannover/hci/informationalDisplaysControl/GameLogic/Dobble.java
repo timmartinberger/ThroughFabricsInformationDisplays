@@ -155,11 +155,6 @@ public class Dobble {
                     System.out.print(b + " ");
                 }
                 BLEServiceInstance.getBLEService().writeCharacteristic(deviceMacList.get(playerNr), BLEService.MODE_CHARACTERISTIC_UUID, "6");
-                try {
-                    Thread.sleep(100);
-                } catch (Exception e) {
-
-                }
                 BLEServiceInstance.getBLEService().writeCharacteristic(deviceMacList.get(playerNr), BLEService.DATA_CHARACTERISTIC_UUID, data);
             } catch (Exception e) {
                 System.out.println("Failed sending!");
