@@ -20,6 +20,7 @@ public class Dobble {
     private int rounds;
     final private ArrayList<Symbol> symbolList = new ArrayList<>();
     final private Random random = new Random();
+    //private
 
 
     public Dobble(int numberOfPlayers, int rounds) {
