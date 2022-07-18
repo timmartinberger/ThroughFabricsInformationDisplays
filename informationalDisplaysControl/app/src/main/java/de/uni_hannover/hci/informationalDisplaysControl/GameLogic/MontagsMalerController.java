@@ -23,7 +23,15 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 public class MontagsMalerController extends AppCompatActivity {
 
@@ -35,6 +43,8 @@ public class MontagsMalerController extends AppCompatActivity {
     private TextView toBeDrawn;
     private final ArrayList<DrawAction> actionList = new ArrayList<>();
     private DrawingColor[] rootState;
+    private List<String> drawableImagesList = new ArrayList<>();
+    private List<String> availableImages = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,11 +65,28 @@ public class MontagsMalerController extends AppCompatActivity {
         OnBackPressedCallback endMMCallback = Utils.endGameCallback(this);
         this.getOnBackPressedDispatcher().addCallback(this, endMMCallback);
 
-        toBeDrawn.setText("Pepe");
+        initDrawList();
+        availableImages.addAll(drawableImagesList);
+        Collections.shuffle(availableImages);
         toBeDrawn.setTextSize(24);
+        setRandomDrawableSymbol();
     }
 
+    private void setRandomDrawableSymbol() {
+        System.out.println("Images left: " + availableImages.size());
+        if(availableImages.size() < 1) {
+            System.out.println("Refilling..." + availableImages.size());
+            availableImages.addAll(drawableImagesList);
+            Collections.shuffle(availableImages);
+        }
+        String text = availableImages.get(0);
+        availableImages.remove(0);
+        toBeDrawn.setText(text);
+    }
 
+    public void nextDrawable(View view) {
+        setRandomDrawableSymbol();
+    }
 
     private ImageView generateColorPickerElement(DrawingColor color) {
         ImageView colorObject = new ImageView(this);
@@ -248,6 +275,17 @@ public class MontagsMalerController extends AppCompatActivity {
             BLEServiceInstance.getBLEService().writeCharacteristic(Devices.getMacAsString(0), BLEService.DATA_CHARACTERISTIC_UUID, array);
         } catch (Exception e) {
             System.out.println("device not connected?");
+        }
+    }
+
+    private void initDrawList() {
+        try {
+            final InputStream file = getAssets().open("drawable_symbols.txt");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(file));
+            this.drawableImagesList = reader.lines().collect(Collectors.toList());
+        }
+        catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
