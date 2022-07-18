@@ -90,15 +90,6 @@ public class WhoAmI extends AppCompatActivity {
         }
     }
 
-    // todo delete
-    // standardBT connection
-//    private void sendNamesToDevices(ArrayList<String> nameList) {
-//        for(int i = 0; i < nameList.size(); i++){
-//            BluetoothConnection btconn = new BluetoothConnection();
-//            btconn.sendText(Devices.getMacAsString(i), nameList.get(i), this);
-//        }
-//    }
-
 
     private void sendNamesToDevices(ArrayList<String> nameList) {
         for(int i = 0; i < nameList.size(); i++){

@@ -77,7 +77,7 @@ public class Dobble {
             System.out.println("+++++++++++++++++++");
             try {
                 //Thread.sleep(60000);
-                Thread.sleep(10000);
+                Thread.sleep(4000);
             } catch (InterruptedException e) {
                 // button pressed, continue
             }
@@ -85,7 +85,7 @@ public class Dobble {
             sendToPlayers(singleSymbolList(currentSymbol), deviceMacList);
             //get signal
             try {
-                Thread.sleep(10000);
+                Thread.sleep(4000);
             } catch (Exception e) {
                 // button pressed, continue
             }
@@ -128,7 +128,7 @@ public class Dobble {
         byte[] data = new byte[symbols.size()];
         int counter = 0;
         for(Symbol symbol: symbols) {
-            data[counter] = (byte)(symbol.getCode() & 0xFF);
+            data[counter] = (byte)((symbol.getCode() + 1) & 0xFF);
             counter++;
         }
         return data;
@@ -156,6 +156,7 @@ public class Dobble {
                 }
                 BLEServiceInstance.getBLEService().writeCharacteristic(deviceMacList.get(playerNr), BLEService.MODE_CHARACTERISTIC_UUID, "6");
                 BLEServiceInstance.getBLEService().writeCharacteristic(deviceMacList.get(playerNr), BLEService.DATA_CHARACTERISTIC_UUID, data);
+
             } catch (Exception e) {
                 System.out.println("Failed sending!");
             }
