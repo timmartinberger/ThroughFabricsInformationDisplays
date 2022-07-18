@@ -16,6 +16,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.os.AsyncTask;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -23,6 +24,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import de.uni_hannover.hci.informationalDisplaysControl.Utils;
+import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.BLEService;
+import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.BLEServiceInstance;
 import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.BluetoothConnection;
 import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.Devices;
 import de.uni_hannover.hci.informationalDisplaysControl.R;
@@ -66,6 +70,10 @@ public class SendText extends AppCompatActivity {
                 finish();
             }
         });
+
+        BLEServiceInstance.getBLEService().writeCharacteristicToAll(BLEService.MODE_CHARACTERISTIC_UUID, "2");
+        OnBackPressedCallback endSTCallback = Utils.endGameCallback(this);
+        this.getOnBackPressedDispatcher().addCallback(this, endSTCallback);
     }
 
     // Send text via bluetooth to ALL esp32

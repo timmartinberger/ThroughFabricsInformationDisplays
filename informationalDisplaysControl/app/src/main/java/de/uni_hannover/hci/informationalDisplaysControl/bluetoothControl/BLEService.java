@@ -21,6 +21,7 @@ import androidx.annotation.Nullable;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -61,7 +62,7 @@ public class BLEService extends Service {
                 broadcastUpdate(ACTION_GATT_CONNECTED, gatt);
                 // discover services after connection
                 try {
-                    Thread.sleep(200);
+                    Thread.sleep(100);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -84,11 +85,6 @@ public class BLEService extends Service {
                 }
                 // Todo: Check if this is the right place to activate notification
                 //setCharacteristicNotification(gatt.getService(UUID.fromString(SERVICE_UUID)).getCharacteristic(UUID.fromString(BUTTON_CHARACTERISTIC_UUID)), true);
-                try {
-                    Thread.sleep(200);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
             } else {
                 Log.i("testbt", "onServicesDiscovered received: " + status);
             }
@@ -105,7 +101,6 @@ public class BLEService extends Service {
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             broadcastUpdate(ACTION_DATA_AVAILABLE, gatt, characteristic);
         }
-
 
     };
 
@@ -173,6 +168,7 @@ public class BLEService extends Service {
         gatt.readCharacteristic(characteristic);
     }
 
+
     // write string value
     @SuppressLint("MissingPermission")
     public void writeCharacteristic(String mac, String characteristicUUID, String data) {
@@ -186,6 +182,11 @@ public class BLEService extends Service {
         BluetoothGattCharacteristic characteristic = gatt.getService(UUID.fromString(SERVICE_UUID)).getCharacteristic(UUID.fromString(characteristicUUID));
         characteristic.setValue(value);
         gatt.writeCharacteristic(characteristic);
+        try {
+            Thread.sleep(30);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -205,9 +206,14 @@ public class BLEService extends Service {
             characteristic.setValue(value);
             gatt.writeCharacteristic(characteristic);
         }
+        try {
+            Thread.sleep(30);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
-    // write int value
+    // write byte value
     @SuppressLint("MissingPermission")
     public void writeCharacteristic(String mac, String characteristicUUID, byte[] data) {
         BluetoothGatt gatt = getGattByMAC(mac);
@@ -218,7 +224,13 @@ public class BLEService extends Service {
 
         BluetoothGattCharacteristic characteristic = gatt.getService(UUID.fromString(SERVICE_UUID)).getCharacteristic(UUID.fromString(characteristicUUID));
         characteristic.setValue(data);
+        Log.i("testbt", "writeByteArray: " + data.length + " " +  data.toString());
         gatt.writeCharacteristic(characteristic);
+        try {
+            Thread.sleep(30);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     // setup notification
