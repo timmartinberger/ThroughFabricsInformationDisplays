@@ -10,10 +10,12 @@ import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.BLEServ
 import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.Devices;
 
 
+import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.os.Bundle;
 import android.util.Pair;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
@@ -88,6 +90,7 @@ public class MontagsMalerController extends AppCompatActivity {
         setRandomDrawableSymbol();
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private ImageView generateColorPickerElement(DrawingColor color) {
         ImageView colorObject = new ImageView(this);
         colorObject.setImageDrawable(getDrawable(R.drawable.color_object));
@@ -96,6 +99,22 @@ public class MontagsMalerController extends AppCompatActivity {
                 LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         params.setMargins(16,16,16,16);
         colorObject.setLayoutParams(params);
+
+        // Listener to set color
+        colorObject.setOnTouchListener(new View.OnTouchListener() {
+            @SuppressLint("ClickableViewAccessibility")
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(event.getAction() == MotionEvent.ACTION_MOVE){
+
+                    // Do what you want
+                    return true;
+                }
+                return false;
+            }
+        });
+
+
         colorObject.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
