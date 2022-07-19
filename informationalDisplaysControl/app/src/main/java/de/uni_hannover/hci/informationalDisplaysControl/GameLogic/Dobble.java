@@ -1,5 +1,9 @@
 package de.uni_hannover.hci.informationalDisplaysControl.GameLogic;
 
+import android.content.Context;
+import android.view.View;
+import android.widget.Button;
+
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,7 +16,7 @@ import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.BLEServ
 import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.BLEServiceInstance;
 import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.Devices;
 
-public class Dobble {
+public class Dobble extends Thread {
 
     private int numberOfPlayers;
     private final int MAX_SYMBOLS = 8;
@@ -20,14 +24,14 @@ public class Dobble {
     private int rounds;
     final private ArrayList<Symbol> symbolList = new ArrayList<>();
     final private Random random = new Random();
-    //private
+    private Context context;
 
-
-    public Dobble(int numberOfPlayers, int rounds) {
+    public Dobble(Context context, int rounds, int numberOfPlayers) {
+        this.rounds = rounds;
         this.numberOfPlayers = numberOfPlayers;
+        this.context = context;
         this.symbolList.addAll(Arrays.stream(Symbol.values()).collect(Collectors.toList()));
         this.currentMaxSymbols = generateCurrentMaxSymbols();
-        this.rounds = rounds;
     }
 
     private int generateCurrentMaxSymbols() {
@@ -35,11 +39,6 @@ public class Dobble {
         return (currentMaxSymbols >= MAX_SYMBOLS) ?  7 : currentMaxSymbols;
     }
 
-    public void startGame() {
-        System.out.println("Number of symbols: " + symbolList.size());
-        System.out.println("----------------------------");
-        playingMatch();
-    }
 
     /*
         Ablauf:
@@ -54,13 +53,16 @@ public class Dobble {
         9. nächste Runde...
      */
 
-    private void playingMatch() {
+    public void run() {
+        System.out.println("Number of symbols: " + symbolList.size());
+        System.out.println("----------------------------");
         ArrayList<String> deviceMacList = new ArrayList<>();
         ArrayList<ArrayList<Symbol>> playersSymbols;
         Symbol currentSymbol;
         initDeviceMacList(deviceMacList);
-
+        //System.out.println("LETS GO");
         //round loop
+        setBTMode(deviceMacList);
         for(int i = 0; i < rounds; i++) {
             currentSymbol = getRoundSymbol();
             //init player display
@@ -69,6 +71,8 @@ public class Dobble {
                 //Thread.sleep(60000);
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
+                endGame();
+                return;
                 // button pressed, continue
             }
             sendToPlayers(playersSymbols, deviceMacList);
@@ -80,6 +84,8 @@ public class Dobble {
                 //Thread.sleep(60000);
                 Thread.sleep(10000);
             } catch (InterruptedException e) {
+                endGame();
+                return;
                 // button pressed, continue
             }
             //send currentSymbol to all players
@@ -87,11 +93,17 @@ public class Dobble {
             //get signal
             try {
                 Thread.sleep(10000);
-            } catch (Exception e) {
+            } catch (InterruptedException e) {
+                endGame();
+                return;
                 // button pressed, continue
             }
             //repeat game
         }
+    }
+
+    private void endGame() {
+        System.out.println("Game stopped!!!");
     }
 
     private Symbol getRoundSymbol() {
@@ -151,16 +163,17 @@ public class Dobble {
             //printSymbolArray(list, playerNr);
             try {
                 byte[] data = getSymbolBytes(playersSymbols.get(playerNr));
-                System.out.println(data.length);
-                for(byte b : data) {
-                    System.out.print(b + " ");
-                }
-                BLEServiceInstance.getBLEService().writeCharacteristic(deviceMacList.get(playerNr), BLEService.MODE_CHARACTERISTIC_UUID, "6");
                 BLEServiceInstance.getBLEService().writeCharacteristic(deviceMacList.get(playerNr), BLEService.DATA_CHARACTERISTIC_UUID, data);
             } catch (Exception e) {
                 System.out.println("Failed sending!");
             }
             playerNr++;
+        }
+    }
+
+    private void setBTMode(ArrayList<String> deviceMacList) {
+        for(String device: deviceMacList) {
+            BLEServiceInstance.getBLEService().writeCharacteristic(device, BLEService.MODE_CHARACTERISTIC_UUID, "6");
         }
     }
 
