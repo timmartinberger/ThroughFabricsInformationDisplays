@@ -38,6 +38,7 @@ MatrixPanel_I2S_DMA *dma_display = nullptr;
 // Button Pin
 const int buttonPin = 25; 
 
+
 uint16_t BLACK = dma_display->color565(0, 0, 0);
 uint16_t WHITE = dma_display->color565(255, 255, 255);
 uint16_t RED = dma_display->color565(255, 0, 0);
@@ -322,7 +323,7 @@ TaskHandle_t handle_drawText;
 // Functions to controll LED MATRIX
 void drawText(void * pvParameters){  
   // init text parameters
-  int font_size = 2;
+  int font_size = 1;
   dma_display->setTextSize(font_size); // size 1 == 8 pixels high
   dma_display->setTextWrap(false); // Don't wrap at end of line - will do ourselves
   dma_display->setTextColor(dma_display->color444(50, 100, 127));
@@ -331,7 +332,7 @@ void drawText(void * pvParameters){
   uint8_t w = 0;
   int shifts = font_size * (strlen(text) * 5 + strlen(text)); // 5 for width of a single letter
   for (int s = 0; s < 32 + shifts; s++){
-    dma_display->setCursor(32 - s, 1);
+    dma_display->setCursor(32 - s, 4);
     for (w=0; w<strlen(text); w++) {
       dma_display->print(text[w]);
     }
@@ -476,6 +477,7 @@ void setup() {
 
   mxconfig.clkphase = false;
   mxconfig.driver = HUB75_I2S_CFG::FM6126A;
+  pinMode(buttonPin, INPUT);
 
   // Display Setup
   dma_display = new MatrixPanel_I2S_DMA(mxconfig);
@@ -615,6 +617,12 @@ void loop() {
   }
 
   // Code example to check button state
+  if (digitalRead(buttonPin) == 1){
+    Serial.println("BUTTON PRESSED!");
+  } else {
+    Serial.println("BUTTON NOT PRESSED!");
+  }
+  
   /*
   if(deviceConnected && digitalRead(buttonPin)){
     char* buttonState = "1";
@@ -623,7 +631,7 @@ void loop() {
     delay(50);
     buttonCharacteristic->setValue("0");
   }
-  */
+  */  
   delay(100);
 
 
