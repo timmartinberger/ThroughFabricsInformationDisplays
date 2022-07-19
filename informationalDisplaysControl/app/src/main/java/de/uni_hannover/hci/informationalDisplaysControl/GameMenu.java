@@ -3,10 +3,12 @@ package de.uni_hannover.hci.informationalDisplaysControl;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothGattService;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
@@ -16,6 +18,7 @@ import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -54,7 +57,6 @@ public class GameMenu extends AppCompatActivity {
         gameList.add(new Game(getString(R.string.dobble), "", null, DobbleController.class));
         gameList.add(new Game(getString(R.string.drawing_guessing), "", null, MontagsMalerController.class));
         gameList.add(new Game(getString(R.string.send_text), "Send a any text to the LED Matrices", null, SendText.class));
-        gameList.add(new Game("BLETest", "", null, BLETestActivity.class));
 
         GameAdapter gameAdapter = new GameAdapter(this, gameList);
 
@@ -64,9 +66,33 @@ public class GameMenu extends AppCompatActivity {
 
         // Connect service
         // todo change place of permission
-        BLETestActivity.checkPermissions(this, this);
+        Utils.checkPermissions(this, this);
         Intent gattServiceIntent = new Intent(this, BLEService.class);
         serviceBound = this.bindService(gattServiceIntent, BLEServiceInstance.serviceConnection, Context.BIND_AUTO_CREATE);
+
+        AlertDialog.Builder endGameMenu = new AlertDialog.Builder(this)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle("Do you want to close the game menu?")
+                .setMessage("Your bluetooth devices will be disconnected!")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        BLEServiceInstance.getBLEService().closeAll();
+                        BLEServiceInstance.deleteService();
+                        finish();
+                    }
+                })
+                .setNegativeButton("No", null);
+
+        // Add callback to close gameMenu
+        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                    endGameMenu.show();
+            }
+        };
+
+        this.getOnBackPressedDispatcher().addCallback(this, callback);
 
     }
 
@@ -108,14 +134,28 @@ public class GameMenu extends AppCompatActivity {
         }
     };
 
+
+
+
+    private static AlertDialog.Builder endGameDialog(AppCompatActivity context) {
+        return new AlertDialog.Builder(context)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle("Do you want to end this game?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        BLEServiceInstance.getBLEService().writeCharacteristicToAll(BLEService.MODE_CHARACTERISTIC_UUID, "1");
+                        context.finish();
+                    }
+                })
+                .setNegativeButton("No", null);
+    }
+
+
     @Override
     protected void onResume() {
         super.onResume();
         registerReceiver(gattUpdateReceiver, BLEService.makeGattUpdateIntentFilter());
-//        if (bleService != null) {
-//            final boolean result = bleService.connect(ESP1Address);
-//            Log.i("testbt", "Connect request result=" + result);
-//        }
     }
 
     @Override

@@ -62,7 +62,7 @@ public class Dobble extends Thread {
         initDeviceMacList(deviceMacList);
         //System.out.println("LETS GO");
         //round loop
-        setBTMode(deviceMacList);
+        setBTMode(deviceMacList, "6");
         for(int i = 0; i < rounds; i++) {
             currentSymbol = getRoundSymbol();
             //init player display
@@ -71,7 +71,7 @@ public class Dobble extends Thread {
                 //Thread.sleep(60000);
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
-                endGame();
+                endGame(deviceMacList);
                 return;
                 // button pressed, continue
             }
@@ -84,7 +84,7 @@ public class Dobble extends Thread {
                 //Thread.sleep(60000);
                 Thread.sleep(10000);
             } catch (InterruptedException e) {
-                endGame();
+                endGame(deviceMacList);
                 return;
                 // button pressed, continue
             }
@@ -94,7 +94,7 @@ public class Dobble extends Thread {
             try {
                 Thread.sleep(10000);
             } catch (InterruptedException e) {
-                endGame();
+                endGame(deviceMacList);
                 return;
                 // button pressed, continue
             }
@@ -102,8 +102,10 @@ public class Dobble extends Thread {
         }
     }
 
-    private void endGame() {
+    private void endGame(ArrayList<String> deviceMacList) {
         System.out.println("Game stopped!!!");
+        setBTMode(deviceMacList, "5");
+
     }
 
     private Symbol getRoundSymbol() {
@@ -141,7 +143,7 @@ public class Dobble extends Thread {
         byte[] data = new byte[symbols.size()];
         int counter = 0;
         for(Symbol symbol: symbols) {
-            data[counter] = (byte)(symbol.getCode() & 0xFF);
+            data[counter] = (byte)((symbol.getCode()+1) & 0xFF);
             counter++;
         }
         return data;
@@ -171,9 +173,9 @@ public class Dobble extends Thread {
         }
     }
 
-    private void setBTMode(ArrayList<String> deviceMacList) {
+    private void setBTMode(ArrayList<String> deviceMacList, String mode) {
         for(String device: deviceMacList) {
-            BLEServiceInstance.getBLEService().writeCharacteristic(device, BLEService.MODE_CHARACTERISTIC_UUID, "6");
+            BLEServiceInstance.getBLEService().writeCharacteristic(device, BLEService.MODE_CHARACTERISTIC_UUID, mode);
         }
     }
 

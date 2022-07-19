@@ -61,6 +61,7 @@ public class MontagsMalerController extends AppCompatActivity {
         initColors();
         this.rootState = getBoardState();
         BLEServiceInstance.getBLEService().writeCharacteristicToAll(BLEService.MODE_CHARACTERISTIC_UUID, "4");
+
         OnBackPressedCallback endMMCallback = Utils.endGameCallback(this);
         this.getOnBackPressedDispatcher().addCallback(this, endMMCallback);
 

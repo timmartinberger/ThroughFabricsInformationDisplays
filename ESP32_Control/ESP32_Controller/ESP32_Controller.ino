@@ -46,7 +46,7 @@ uint16_t BLUE = dma_display->color565(0, 0, 255);
 
 // alles + 1
 // colors: 0: red , 1: blau, 2: yellow, 3: orange, 4: magenta, 5: dark grey, 6: green, 7: brown, 8: white 9: light blue
-int colors[] = {0, 63488, 2110, 65504, 64512, 59608, 16968, 4064, 14593, 65535, 1503};
+int colors[] = {63488, 2110, 65504, 64512, 59608, 16968, 4064, 14593, 65535, 1503};
 
 
 // Data for images
@@ -314,7 +314,7 @@ union iconCollection {
   };
 } icons;
 
-
+char memblock[50];
 char* text;
 boolean drawing = false;
 TaskHandle_t handle_drawText;
@@ -339,14 +339,24 @@ void drawText(void * pvParameters){
     dma_display->fillScreen(dma_display->color444(0, 0, 0));
   }
   drawing = false;
+  handle_drawText = NULL;
   vTaskDelete(NULL);
 }
 
 void startDrawingThread(char* t){
   if(!drawing){
     drawing = true;
-    text = t;  
-    //handle_drawText = new TaskHandle_t;
+    
+    Serial.println("ThreadStarter:");
+    Serial.println(t);
+    for(size_t i = 0; i < strlen(t); i++){
+      memblock[i] = t[i];
+    }  
+    memblock[strlen(t)] = '\0';
+    text = &memblock[0];
+    Serial.println(text);
+    handle_drawText = NULL;
+    handle_drawText = new TaskHandle_t;
     
     xTaskCreatePinnedToCore(
       drawText, // function to be executed
@@ -396,6 +406,16 @@ BLECharacteristic *buttonCharacteristic;
 // Connection status 
 boolean deviceConnected = false;
 
+// Advertising function
+void advertise(){
+  BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
+  pAdvertising->addServiceUUID(SERVICE_UUID);
+  pAdvertising->setScanResponse(true);
+  pAdvertising->setMinPreferred(0x06);  // functions that help with iPhone connections issue
+  pAdvertising->setMinPreferred(0x12);
+  BLEDevice::startAdvertising();
+}
+
 // Callback onConnect and onDisconnect
 class ServerCallbacks: public BLEServerCallbacks {
   void onConnect(BLEServer* pServer) {
@@ -409,16 +429,6 @@ class ServerCallbacks: public BLEServerCallbacks {
     advertise();
   }
 };
-
-// Advertising function
-void advertise(){
-  BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
-  pAdvertising->addServiceUUID(SERVICE_UUID);
-  pAdvertising->setScanResponse(true);
-  pAdvertising->setMinPreferred(0x06);  // functions that help with iPhone connections issue
-  pAdvertising->setMinPreferred(0x12);
-  BLEDevice::startAdvertising();
-}
 
 // --------------------------------------------------------------------------------------------------------
 // HELPER FUNCTIONS ---------------------------------------------------------------------------------------
@@ -523,9 +533,10 @@ void loop() {
   
   // If mode changed, stop drawing text task
   if (prev_MODE != MODE) {
-    // vTaskDelete(handle_drawText);
-    //dataCharacteristic->setValue("");
-    buttonCharacteristic->setValue("");
+    if (drawing){
+      vTaskDelete(handle_drawText);
+      drawing = false;
+    }
     painting = false;
     dma_display->clearScreen();
   }
@@ -557,23 +568,24 @@ void loop() {
   // DRAWING AND GUESSING - Montagsmaler
   else if (MODE == '4'){
     Serial.println("m4");
-    if (!drawing && !painting){
+    if (!painting){
       dma_display->fillRect(11, 3, 10, 10, dma_display->color444(15, 15, 15));
       painting = true;
-    } else if (painting && !drawing){
+
+    } else if (painting){
       char* data = (char*) dataCharacteristic->getValue().data();
       Serial.print("Data: ");
       Serial.println(data);
       if (strlen(data) == 3){
         int16_t x_pos = ((int16_t)0x00 << 8) | data[0];
         int16_t y_pos = ((int16_t)0x00 << 8) | data[1];
-        uint16_t color = colors[((int16_t)0x00 << 8) | data[2]];
+        uint16_t color = colors[(((int16_t)0x00 << 8) | data[2]) - 1];
         dma_display->drawPixel(x_pos + 10, y_pos + 2, color);
       } else if (strlen(data) == 100) {
         Serial.println("Elseteil");
         int img[100];
         for (int i = 0; i < 100; i++){
-          img[i] = colors[((int16_t)0x00 << 8) | data[i]];
+          img[i] = colors[(((int16_t)0x00 << 8) | data[i]) - 1];
         }
         dma_display->drawIcon(img, 11, 3, 10, 10);
       }
@@ -591,21 +603,11 @@ void loop() {
   } else if (MODE == '6') {
     Serial.println("m6");
     char* value = (char*) dataCharacteristic->getValue().data();
-    Serial.print("Data: ");
-    for (int i = 0; i < 10; i++){
-      Serial.println(value + 48);
-    }
-    // Serial.println("Length ");
-    // Serial.write(strlen(data));
-    // Serial.write(sizeof(data));
-    // Serial.write(sizeof(data)/sizeof(char));
+    Serial.println(strlen(value));
     int ic[strlen(value)];
 
-
-    // Serial.write(strlen(data));
     for (int i = 0; i < strlen(value); i++){
-      ic[i] = ((uint16_t)0x00 << 8) | value[i];
-      // Serial.write(ic[i]);
+      ic[i] = (((uint16_t)0x00 << 8) | value[i]) - 1;
     }
 
     drawIcons(ic, strlen(value));

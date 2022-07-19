@@ -32,7 +32,7 @@ public class BLEService extends Service {
     private BluetoothAdapter bluetoothAdapter;
 
     public ArrayList<BluetoothGatt> bluetoothGatts;
-    public ArrayList<Integer> connectionState;
+    private ArrayList<byte[]> values;
 
     // connection state
     public final static String ACTION_GATT_CONNECTED = "GATT_CONNECTED";
@@ -44,11 +44,6 @@ public class BLEService extends Service {
     public final static String MODE_CHARACTERISTIC_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
     public final static String DATA_CHARACTERISTIC_UUID = "84e3a48f-7172-4952-8e59-64af6ce20583";
     public final static String BUTTON_CHARACTERISTIC_UUID = "07bf0001-7a36-490f-ba53-345b3642a694";
-
-    private static final int STATE_DISCONNECTED = 0;
-    private static final int STATE_CONNECTED = 2;
-
-
 
 
     // Callback, um Verbindung zu überwachen -------------------------------------------------------
@@ -102,6 +97,17 @@ public class BLEService extends Service {
             broadcastUpdate(ACTION_DATA_AVAILABLE, gatt, characteristic);
         }
 
+        @SuppressLint("MissingPermission")
+        @Override
+        public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+            Log.i("testbt", "onCharacteristicWrite: " + Arrays.toString(characteristic.getValue()));
+
+            byte[] last = values.get(bluetoothGatts.indexOf(gatt));
+            if (characteristic.getValue() != last) {
+                writeCharacteristic(gatt.getDevice().getAddress(), characteristic.getUuid().toString(), last);
+            }
+        }
+
     };
 
     // Service initialisieren ----------------------------------------------------------------------
@@ -141,8 +147,11 @@ public class BLEService extends Service {
             BluetoothGatt bluetoothGatt = device.connectGatt(this, true, bluetoothGattCallback, BluetoothDevice.TRANSPORT_LE);
             if (bluetoothGatts == null){
                 bluetoothGatts = new ArrayList<BluetoothGatt>();
+                values = new ArrayList<byte[]>();
             }
             bluetoothGatts.add(bluetoothGatt);
+            byte[] b = {};
+            values.add(b);
             return true;
         } catch (IllegalArgumentException exception) {
             Log.w("testbt", "Device not found with provided address.  Unable to connect.");
@@ -181,9 +190,12 @@ public class BLEService extends Service {
         byte[] value = data.getBytes(StandardCharsets.UTF_8);
         BluetoothGattCharacteristic characteristic = gatt.getService(UUID.fromString(SERVICE_UUID)).getCharacteristic(UUID.fromString(characteristicUUID));
         characteristic.setValue(value);
+
+        //todo check this
+        values.set(bluetoothGatts.indexOf(gatt), value);
         gatt.writeCharacteristic(characteristic);
         try {
-            Thread.sleep(30);
+            Thread.sleep(100);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -202,12 +214,14 @@ public class BLEService extends Service {
             }
 
             byte[] value = data.getBytes(StandardCharsets.UTF_8);
+            //todo check this
+            values.set(bluetoothGatts.indexOf(gatt), value);
             BluetoothGattCharacteristic characteristic = gatt.getService(UUID.fromString(SERVICE_UUID)).getCharacteristic(UUID.fromString(characteristicUUID));
             characteristic.setValue(value);
             gatt.writeCharacteristic(characteristic);
         }
         try {
-            Thread.sleep(30);
+            Thread.sleep(100);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -225,9 +239,11 @@ public class BLEService extends Service {
         BluetoothGattCharacteristic characteristic = gatt.getService(UUID.fromString(SERVICE_UUID)).getCharacteristic(UUID.fromString(characteristicUUID));
         characteristic.setValue(data);
         Log.i("testbt", "writeByteArray: " + data.length + " " +  data.toString());
+        //todo check this
+        values.set(bluetoothGatts.indexOf(gatt), data);
         gatt.writeCharacteristic(characteristic);
         try {
-            Thread.sleep(30);
+            Thread.sleep(100);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -271,7 +287,18 @@ public class BLEService extends Service {
     }
 
     public void closeAll(){
+        if (bluetoothGatts == null) return;
+        for(BluetoothGatt gatt: bluetoothGatts) disconnect(gatt);
         for(BluetoothGatt gatt: bluetoothGatts) close(gatt);
+    }
+
+    @SuppressLint("MissingPermission")
+    public void disconnect(BluetoothGatt gatt) {
+        if (bluetoothAdapter == null || gatt == null) {
+            Log.w("testbt", "BluetoothAdapter not initialized");
+            return;
+        }
+        gatt.disconnect();
     }
 
     @SuppressLint("MissingPermission")
@@ -279,7 +306,6 @@ public class BLEService extends Service {
         if (gatt == null) {
             return;
         }
-        gatt.disconnect();
         gatt.close();
         bluetoothGatts.remove(gatt);
     }

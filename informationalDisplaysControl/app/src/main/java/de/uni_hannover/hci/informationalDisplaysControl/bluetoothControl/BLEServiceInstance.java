@@ -50,4 +50,7 @@ public class BLEServiceInstance extends Application {
         return bleService;
     }
 
+    public static void deleteService() {
+        bleService = null;
+    }
 }

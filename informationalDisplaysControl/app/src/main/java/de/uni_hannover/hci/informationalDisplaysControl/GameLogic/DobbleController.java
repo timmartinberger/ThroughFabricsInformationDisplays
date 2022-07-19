@@ -90,6 +90,7 @@ public class DobbleController extends AppCompatActivity {
 
     }
 
-    public void stopGame(View view) {
+    public void stopGame() {
+
     }
 }
