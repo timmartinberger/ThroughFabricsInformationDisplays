@@ -63,7 +63,7 @@ public class Dobble extends Thread {
         initDeviceMacList(deviceMacList);
         //System.out.println("LETS GO");
         //round loop
-        setBTMode(deviceMacList, "6");
+        setBTMode(deviceMacList, "6", true);
         for(int i = 0; i < rounds; i++) {
             currentSymbol = getRoundSymbol();
             //init player display
@@ -104,7 +104,7 @@ public class Dobble extends Thread {
 
     private void endGame(ArrayList<String> deviceMacList) {
         System.out.println("Game stopped!!!");
-        setBTMode(deviceMacList, "5");
+        setBTMode(deviceMacList, "5", false);
 
     }
 
@@ -187,9 +187,10 @@ public class Dobble extends Thread {
         }
     }
 
-    private void setBTMode(ArrayList<String> deviceMacList, String mode) {
+    private void setBTMode(ArrayList<String> deviceMacList, String mode, boolean enableButton) {
         for(String device: deviceMacList) {
             BLEServiceInstance.getBLEService().writeCharacteristic(device, BLEService.MODE_CHARACTERISTIC_UUID, mode);
+            BLEServiceInstance.getBLEService().setCharacteristicNotification(device, BLEService.BUTTON_CHARACTERISTIC_UUID, enableButton);
         }
     }
 
