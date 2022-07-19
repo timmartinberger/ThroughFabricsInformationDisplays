@@ -106,35 +106,30 @@ public class DobbleController extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             Log.i("testbt", "Broadcastreceiver got notification: " + action);
-            String address = intent.getStringExtra("ADDRESS");
-            // todo remove?
-            if (BLEService.ACTION_GATT_CONNECTED.equals(action)) {
+            final String address = intent.getStringExtra("ADDRESS");
 
-            }
-            else if (BLEService.ACTION_GATT_DISCONNECTED.equals(action)) {
-                Toast.makeText(getApplicationContext(), address + " disconnected!", Toast.LENGTH_LONG).show();
-            }
-            else if (BLEService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
-                Log.i("testbt", "Services found:");
+            if (BLEService.ACTION_DATA_AVAILABLE.equals(action)) {
+                final String data = intent.getStringExtra("BUTTON_DATA");
+                if (data.equals("PRESSED")){
+                    // Todo: hier kannst du etwas tun wenn "address" den Button gedrückt hat
+                    // ...
+                    // ...
 
-                List<BluetoothGattService> services = BLEServiceInstance.getBLEService().getSupportedGattServices(BLEServiceInstance.getBLEService().getGattByMAC(address));
-                for (BluetoothGattService service: services){
-                    if (service.getUuid().toString().equals(BLEService.SERVICE_UUID)){
-                        Toast.makeText(getApplicationContext(), address + " connected!", Toast.LENGTH_LONG).show();
-                        return;
-                    }
-                }
-                Toast.makeText(getApplicationContext(), "Device with address " + address + " is not compatible!", Toast.LENGTH_LONG).show();
-                finish();
-            }
-            else if (BLEService.ACTION_DATA_AVAILABLE.equals(action)) {
-                Bundle bundle = intent.getExtras();
-                if (bundle != null) {
-                    for (String key : bundle.keySet()) {
-                        Log.e("testbt", key + " : " + (bundle.get(key) != null ? bundle.get(key) : "NULL"));
-                    }
                 }
             }
         }
     };
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(gattUpdateReceiver, BLEService.makeGattUpdateIntentFilter());
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(gattUpdateReceiver);
+    }
 }
