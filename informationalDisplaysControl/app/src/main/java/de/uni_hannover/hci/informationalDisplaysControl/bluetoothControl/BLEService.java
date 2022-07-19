@@ -103,7 +103,7 @@ public class BLEService extends Service {
             Log.i("testbt", "onCharacteristicWrite: " + Arrays.toString(characteristic.getValue()));
 
             byte[] last = values.get(bluetoothGatts.indexOf(gatt));
-            if (characteristic.getValue() != last) {
+            if (!Arrays.equals(last, characteristic.getValue())) {
                 writeCharacteristic(gatt.getDevice().getAddress(), characteristic.getUuid().toString(), last);
             }
         }
@@ -247,15 +247,18 @@ public class BLEService extends Service {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
     }
 
     // setup notification
     @SuppressLint("MissingPermission")
-    public void setCharacteristicNotification(BluetoothGattCharacteristic characteristic, BluetoothGatt gatt, boolean enabled) {
+    public void setCharacteristicNotification(String mac, String characteristicUUID, boolean enabled) {
+        BluetoothGatt gatt = getGattByMAC(mac);
         if (gatt == null) {
             Log.w("testbt", "BluetoothGatt not initialized");
             return;
         }
+        BluetoothGattCharacteristic characteristic = gatt.getService(UUID.fromString(SERVICE_UUID)).getCharacteristic(UUID.fromString(characteristicUUID));
         gatt.setCharacteristicNotification(characteristic, enabled);
 
         // This is specific to Heart Rate Measurement.
