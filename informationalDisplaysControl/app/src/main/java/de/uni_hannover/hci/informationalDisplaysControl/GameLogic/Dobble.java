@@ -25,6 +25,7 @@ public class Dobble extends Thread {
     final private ArrayList<Symbol> symbolList = new ArrayList<>();
     final private Random random = new Random();
     private Context context;
+    private boolean buttonPressed;
 
     public Dobble(Context context, int rounds, int numberOfPlayers) {
         this.rounds = rounds;
@@ -67,32 +68,31 @@ public class Dobble extends Thread {
             currentSymbol = getRoundSymbol();
             //init player display
             playersSymbols = getPlayersSymbols(currentSymbol);
-            try {
+            /*try {
                 //Thread.sleep(60000);
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 endGame(deviceMacList);
                 return;
                 // button pressed, continue
-            }
+            }*/
             sendToPlayers(playersSymbols, deviceMacList);
-            //sendToPlayers(singleSymbolList(currentSymbol), deviceMacList);
             System.out.println("Round " + i + ":");
 
             System.out.println("+++++++++++++++++++");
             try {
-                //Thread.sleep(60000);
-                Thread.sleep(10000);
+                waitForInput();
+                //Thread.sleep(10000);
             } catch (InterruptedException e) {
                 endGame(deviceMacList);
                 return;
-                // button pressed, continue
             }
             //send currentSymbol to all players
             sendToPlayers(singleSymbolList(currentSymbol), deviceMacList);
             //get signal
             try {
-                Thread.sleep(10000);
+                //Thread.sleep(10000);
+                waitForInput();
             } catch (InterruptedException e) {
                 endGame(deviceMacList);
                 return;
@@ -130,7 +130,21 @@ public class Dobble extends Thread {
         }
         return playersSymbols;
     }
-
+    private void waitForInput() throws InterruptedException {
+        final int MAX_WAIT_DURATION = 60;
+        for(int i = 0; i < MAX_WAIT_DURATION; i++) {
+            if(buttonPressed) {
+                return;
+            }
+            else {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    throw new InterruptedException();
+                }
+            }
+        }
+    }
     private void printSymbolArray(ArrayList<Symbol> list, int player) {
         System.out.print("Player " + player + ": ");
         for(Symbol s: list) {
