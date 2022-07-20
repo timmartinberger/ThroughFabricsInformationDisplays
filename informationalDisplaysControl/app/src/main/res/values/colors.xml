@@ -2,5 +2,11 @@
 <resources>
     <color name="mid_red">#f44336</color>
     <color name="dark_grey">#212121</color>
-    <color name="almost_white">#ffffff</color>
+    <color name="white">#ffffff</color>
+
+    <color name="theme_main">#262626</color>
+    <color name="theme_red">#ff3737</color>
+    <color name="theme_yellow">#ffff00</color>
+    <color name="theme_green">#05ff00</color>
+    <color name="theme_blue">#5effff</color>
 </resources>
