@@ -34,7 +34,6 @@ public class DobbleController extends AppCompatActivity {
 
 
         this.roundsInput = findViewById(R.id.roundsInput);
-        roundsInput.setText("10\n");
         BLEServiceInstance.getBLEService().writeCharacteristicToAll(BLEService.MODE_CHARACTERISTIC_UUID, "5");
         OnBackPressedCallback endDobbleCallback = Utils.endGameCallback(this);
         this.getOnBackPressedDispatcher().addCallback(this, endDobbleCallback);
@@ -52,7 +51,7 @@ public class DobbleController extends AppCompatActivity {
 
     public void startGame(View view) {
         int numberOfPlayers = Devices.getDeviceCount();
-        //numberOfPlayers = 2;
+        numberOfPlayers = 1;
         if (numberOfPlayers < MIN_PLAYERS) {
             Toast msg = Toast.makeText(this, "Not enough players! 3 players are needed!", Toast.LENGTH_SHORT);
             msg.show();
