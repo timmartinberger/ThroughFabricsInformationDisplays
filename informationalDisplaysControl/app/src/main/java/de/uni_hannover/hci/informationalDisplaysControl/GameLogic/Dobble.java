@@ -1,10 +1,5 @@
 package de.uni_hannover.hci.informationalDisplaysControl.GameLogic;
 
-import android.content.Context;
-import android.view.View;
-import android.widget.Button;
-import android.widget.Toast;
-
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,7 +8,6 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import de.uni_hannover.hci.informationalDisplaysControl.baseData.Symbol;
-import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.BLEService;
 import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.BLEServiceInstance;
 import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.Devices;
 
@@ -21,11 +15,15 @@ public class Dobble extends Thread {
 
     private final int numberOfPlayers;
     private final int MAX_SYMBOLS = 8;
+    private final int CIRCLE_CODE = 33;
+    private final int CROSS_Code = 34;
     private final int currentMaxSymbols;
     private final int rounds;
     final private ArrayList<Symbol> symbolList = new ArrayList<>();
     final private Random random = new Random();
-    public boolean buttonPressed = false;
+    public volatile boolean buttonPressed = false;
+    public ArrayList<String> deviceMacList = new ArrayList<>();
+    public volatile String whoPressed = "";
 
 
     public Dobble(int rounds, int numberOfPlayers) {
@@ -54,30 +52,18 @@ public class Dobble extends Thread {
      */
 
     public void run() {
-        System.out.println("----------------------------");
-        ArrayList<String> deviceMacList = new ArrayList<>();
         ArrayList<ArrayList<Symbol>> playersSymbols;
         Symbol currentSymbol;
+
         initDeviceMacList(deviceMacList);
-        //System.out.println("LETS GO");
+        BLEServiceInstance.setControllerOptions(deviceMacList, "6", true);
         //round loop
-        setBTMode(deviceMacList, "6", true);
         for(int i = 0; i < rounds; i++) {
             currentSymbol = getRoundSymbol();
             //init player display
             playersSymbols = getPlayersSymbols(currentSymbol);
-            /*try {
-                //Thread.sleep(60000);
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                endGame(deviceMacList);
-                return;
-                // button pressed, continue
-            }*/
-            sendToPlayers(playersSymbols, deviceMacList);
-            System.out.println("Round " + i + ":");
-
-            System.out.println("+++++++++++++++++++");
+            //show icons on display
+            BLEServiceInstance.sendSymbolsToPlayers(playersSymbols, deviceMacList);
             try {
                 waitForInput(300);
                 //Thread.sleep(10000);
@@ -85,8 +71,17 @@ public class Dobble extends Thread {
                 endGame(deviceMacList);
                 return;
             }
+            //decide who pressed first
+            decideWhoPressedFirst();
+            try {
+                waitForInput(300);
+            } catch (InterruptedException e) {
+                endGame(deviceMacList);
+                return;
+            }
+
             //send currentSymbol to all players
-            sendToPlayers(singleSymbolList(currentSymbol), deviceMacList);
+            BLEServiceInstance.sendSymbolsToPlayers(singleSymbolList(currentSymbol), deviceMacList);
             //get signal
             try {
                 //Thread.sleep(10000);
@@ -106,7 +101,7 @@ public class Dobble extends Thread {
 
     private void endGame(ArrayList<String> deviceMacList) {
         System.out.println("Game stopped!!!");
-        setBTMode(deviceMacList, "5", false);
+        BLEServiceInstance.setControllerOptions(deviceMacList, "5", false);
 
     }
 
@@ -155,7 +150,7 @@ public class Dobble extends Thread {
         }
         return playersSymbols;
     }
-
+    /*
     private void sendToPlayers(ArrayList<ArrayList<Symbol>> playersSymbols, ArrayList<String> deviceMacList) {
         int playerNr = 0;
         for(ArrayList<Symbol> list : playersSymbols) {
@@ -168,8 +163,8 @@ public class Dobble extends Thread {
             }
             playerNr++;
         }
-    }
-
+    }*/
+    /*
     private byte[] getSymbolBytes(ArrayList<Symbol> symbols) {
         byte[] data = new byte[symbols.size()];
         int counter = 0;
@@ -179,17 +174,39 @@ public class Dobble extends Thread {
         }
         return data;
     }
+    */
 
+    /*
     private void setBTMode(ArrayList<String> deviceMacList, String mode, boolean enableButton) {
         for(String device: deviceMacList) {
             BLEServiceInstance.getBLEService().writeCharacteristic(device, BLEService.MODE_CHARACTERISTIC_UUID, mode);
             BLEServiceInstance.getBLEService().setCharacteristicNotification(device, BLEService.BUTTON_CHARACTERISTIC_UUID, enableButton);
         }
-    }
+    }*/
 
     private void initDeviceMacList(ArrayList<String> deviceMacList) {
         for(int deviceNr = 0; deviceNr < Devices.getDeviceCount(); deviceNr++) {
             deviceMacList.add(Devices.getMacAsString(deviceNr));
+        }
+    }
+
+    private void decideWhoPressedFirst() {
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException interruptedException) {
+            System.out.println("Stopped!");
+        }
+        ArrayList<String> lastPressed = new ArrayList<>(deviceMacList);
+        lastPressed.remove(whoPressed);
+        ArrayList<String> firstPressed = new ArrayList<>();
+        firstPressed.add(whoPressed);
+        BLEServiceInstance.sendTurnCodeToPlayers(CIRCLE_CODE, firstPressed);
+        whoPressed = "";
+        BLEServiceInstance.sendTurnCodeToPlayers(CROSS_Code, lastPressed);
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException interruptedException) {
+            System.out.println("Stopped!");
         }
     }
 }

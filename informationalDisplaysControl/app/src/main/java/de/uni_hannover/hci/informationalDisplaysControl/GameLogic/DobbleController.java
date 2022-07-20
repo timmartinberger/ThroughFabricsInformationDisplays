@@ -8,8 +8,6 @@ import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.BLEServ
 import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.BLEServiceInstance;
 import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.Devices;
 
-import android.annotation.SuppressLint;
-import android.bluetooth.BluetoothGattService;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -20,14 +18,11 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.List;
-
 public class DobbleController extends AppCompatActivity {
 
     private TextView roundsInput;
     private final int MIN_PLAYERS = 1;
     private boolean isGameRunning = false;
-    private Thread gameThread;
     private Dobble dobble;
 
 
@@ -56,7 +51,7 @@ public class DobbleController extends AppCompatActivity {
 
     public void startGame(View view) {
         int numberOfPlayers = Devices.getDeviceCount();
-        numberOfPlayers = 1;
+        //numberOfPlayers = 1;
         if (numberOfPlayers < MIN_PLAYERS) {
             Toast msg = Toast.makeText(this, "Not enough players! 3 players are needed!", Toast.LENGTH_SHORT);
             msg.show();
@@ -69,13 +64,12 @@ public class DobbleController extends AppCompatActivity {
                 public void run() {
                         try {
                             isGameRunning=true;
-                            System.out.println("Starting the game!");
                             thread.start();
                             thread.join();
+                            // game finished naturally
                             System.out.println("Game finished!");
                         } catch (InterruptedException e) {
                             thread.interrupt();
-                            System.out.println("game interrupted by stop button");
                         }
                         finally {
                             isGameRunning = false;
@@ -90,7 +84,6 @@ public class DobbleController extends AppCompatActivity {
                         waitGame.interrupt();
                         thread.interrupt();
                         isGameRunning = false;
-                        System.out.println("STOPPING THE GAME...");
                     }
                 }
             });
@@ -99,6 +92,7 @@ public class DobbleController extends AppCompatActivity {
                 waitGame.start();
             }
             else {
+                //start button no use while game running
                 System.out.println("GAME IS ALREADY RUNNING!");
             }
         }
@@ -115,7 +109,17 @@ public class DobbleController extends AppCompatActivity {
             if (BLEService.ACTION_DATA_AVAILABLE.equals(action)) {
                 final String data = intent.getStringExtra("BUTTON_DATA");
                 if (data.equals("PRESSED")){
+                    BLEServiceInstance.setControllerOptions(dobble.deviceMacList, "", false);
+                    dobble.whoPressed = address;
                     dobble.buttonPressed = true;
+                    //disable button for some time
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException interruptedException) {
+                        System.out.println("Interrupted while button disabled!");
+                    }
+                    BLEServiceInstance.setControllerOptions(dobble.deviceMacList, "", true);
+                    //BLEServiceInstance.getBLEService().setCharacteristicNotification(device, BLEService.BUTTON_CHARACTERISTIC_UUID, enableButton);
                 }
             }
         }
