@@ -412,14 +412,11 @@ void startDrawingThread(char* t){
   if(!drawing){
     drawing = true;
     
-    Serial.println("ThreadStarter:");
-    Serial.println(t);
     for(size_t i = 0; i < strlen(t); i++){
       memblock[i] = t[i];
     }  
     memblock[strlen(t)] = '\0';
     text = &memblock[0];
-    Serial.println(text);
     handle_drawText = NULL;
     handle_drawText = new TaskHandle_t;
     
@@ -667,15 +664,24 @@ void loop() {
     Serial.println(strlen(value));
     int ic[strlen(value)];
 
-    for (int i = 0; i < strlen(value); i++){
-      ic[i] = (((uint16_t)0x00 << 8) | value[i]) - 1;
-    }
+    if (strcmp(value, prev_data) != 0){
+      
+      for (int i = 0; i < strlen(value); i++){
+        ic[i] = (((uint16_t)0x00 << 8) | value[i]) - 1;
+      }
 
-    drawIcons(ic, strlen(value));
-    painting = true;
+      drawIcons(ic, strlen(value));
+
+      prev_data = (char*) malloc(strlen(value) + 1);
+      puts(string_copy(value, prev_data));
+
+      painting = true;
+    }
   }
 
   // Code example to check button state
+  // blue button: digitRead == 1 --> PRESSED
+  // black/red button: digitRead == 0 --> PRESSED
   if (digitalRead(buttonPin) == 1 && buttonPressed == 0){
       Serial.println("BUTTON PRESSED!");
       char* buttonState = "1";
@@ -688,7 +694,6 @@ void loop() {
     buttonPressed++;
   } else {
     buttonPressed = false;
-    Serial.println("BUTTON NOT PRESSED!");
   
   }
 
