@@ -3,6 +3,7 @@ package de.uni_hannover.hci.informationalDisplaysControl.GameLogic;
 import android.content.Context;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -18,19 +19,18 @@ import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.Devices
 
 public class Dobble extends Thread {
 
-    private int numberOfPlayers;
+    private final int numberOfPlayers;
     private final int MAX_SYMBOLS = 8;
-    private int currentMaxSymbols;
-    private int rounds;
+    private final int currentMaxSymbols;
+    private final int rounds;
     final private ArrayList<Symbol> symbolList = new ArrayList<>();
     final private Random random = new Random();
-    private Context context;
-    private boolean buttonPressed;
+    public boolean buttonPressed = false;
 
-    public Dobble(Context context, int rounds, int numberOfPlayers) {
+
+    public Dobble(int rounds, int numberOfPlayers) {
         this.rounds = rounds;
         this.numberOfPlayers = numberOfPlayers;
-        this.context = context;
         this.symbolList.addAll(Arrays.stream(Symbol.values()).collect(Collectors.toList()));
         this.currentMaxSymbols = generateCurrentMaxSymbols();
     }
@@ -39,7 +39,6 @@ public class Dobble extends Thread {
         int currentMaxSymbols = (this.symbolList.size()-1) / numberOfPlayers;
         return (currentMaxSymbols >= MAX_SYMBOLS) ?  7 : currentMaxSymbols;
     }
-
 
     /*
         Ablauf:
@@ -55,7 +54,6 @@ public class Dobble extends Thread {
      */
 
     public void run() {
-        System.out.println("Number of symbols: " + symbolList.size());
         System.out.println("----------------------------");
         ArrayList<String> deviceMacList = new ArrayList<>();
         ArrayList<ArrayList<Symbol>> playersSymbols;
@@ -81,7 +79,7 @@ public class Dobble extends Thread {
 
             System.out.println("+++++++++++++++++++");
             try {
-                waitForInput();
+                waitForInput(300);
                 //Thread.sleep(10000);
             } catch (InterruptedException e) {
                 endGame(deviceMacList);
@@ -92,7 +90,7 @@ public class Dobble extends Thread {
             //get signal
             try {
                 //Thread.sleep(10000);
-                waitForInput();
+                waitForInput(300);
             } catch (InterruptedException e) {
                 endGame(deviceMacList);
                 return;
@@ -102,14 +100,14 @@ public class Dobble extends Thread {
         }
     }
 
+    private Symbol getRoundSymbol() {
+        return symbolList.get(random.nextInt(symbolList.size()));
+    }
+
     private void endGame(ArrayList<String> deviceMacList) {
         System.out.println("Game stopped!!!");
         setBTMode(deviceMacList, "5", false);
 
-    }
-
-    private Symbol getRoundSymbol() {
-        return symbolList.get(random.nextInt(symbolList.size()));
     }
 
     private ArrayList<ArrayList<Symbol>> getPlayersSymbols(Symbol currentSymbol) {
@@ -130,10 +128,12 @@ public class Dobble extends Thread {
         }
         return playersSymbols;
     }
-    private void waitForInput() throws InterruptedException {
-        final int MAX_WAIT_DURATION = 60;
-        for(int i = 0; i < MAX_WAIT_DURATION; i++) {
+
+    private void waitForInput(int waitDuration) throws InterruptedException {
+        for(int i = 0; i < waitDuration; i++) {
             if(buttonPressed) {
+                buttonPressed = false;
+                System.out.println("Button Pressed!");
                 return;
             }
             else {
@@ -144,23 +144,6 @@ public class Dobble extends Thread {
                 }
             }
         }
-    }
-    private void printSymbolArray(ArrayList<Symbol> list, int player) {
-        System.out.print("Player " + player + ": ");
-        for(Symbol s: list) {
-            System.out.print(s.name() + " ");
-        }
-        System.out.println();
-    }
-
-    private byte[] getSymbolBytes(ArrayList<Symbol> symbols) {
-        byte[] data = new byte[symbols.size()];
-        int counter = 0;
-        for(Symbol symbol: symbols) {
-            data[counter] = (byte)((symbol.getCode()+1) & 0xFF);
-            counter++;
-        }
-        return data;
     }
 
     private ArrayList<ArrayList<Symbol>> singleSymbolList(Symbol symbol) {
@@ -185,6 +168,16 @@ public class Dobble extends Thread {
             }
             playerNr++;
         }
+    }
+
+    private byte[] getSymbolBytes(ArrayList<Symbol> symbols) {
+        byte[] data = new byte[symbols.size()];
+        int counter = 0;
+        for(Symbol symbol: symbols) {
+            data[counter] = (byte)((symbol.getCode()+1) & 0xFF);
+            counter++;
+        }
+        return data;
     }
 
     private void setBTMode(ArrayList<String> deviceMacList, String mode, boolean enableButton) {
