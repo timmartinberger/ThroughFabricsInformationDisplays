@@ -11,14 +11,9 @@ import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.Devices
 
 
 import android.annotation.SuppressLint;
-import android.graphics.Color;
-import android.graphics.ColorFilter;
 import android.os.Bundle;
-import android.util.Log;
 import android.util.Pair;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -34,7 +29,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 public class MontagsMalerController extends AppCompatActivity {
@@ -48,7 +42,7 @@ public class MontagsMalerController extends AppCompatActivity {
     private final ArrayList<DrawAction> actionList = new ArrayList<>();
     private DrawingColor[] rootState;
     private List<String> drawableImagesList = new ArrayList<>();
-    private List<String> availableImages = new ArrayList<>();
+    private final List<String> availableImages = new ArrayList<>();
 
 
     @SuppressLint("ClickableViewAccessibility")
@@ -81,9 +75,7 @@ public class MontagsMalerController extends AppCompatActivity {
     }
 
     private void setRandomDrawableSymbol() {
-        System.out.println("Images left: " + availableImages.size());
         if(availableImages.size() < 1) {
-            System.out.println("Refilling..." + availableImages.size());
             availableImages.addAll(drawableImagesList);
             Collections.shuffle(availableImages);
         }
@@ -94,6 +86,8 @@ public class MontagsMalerController extends AppCompatActivity {
 
     public void nextDrawable(View view) {
         setRandomDrawableSymbol();
+        fillBoardWithColor(DrawingColor.WHITE);
+        this.actionList.clear();
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")
@@ -163,12 +157,13 @@ public class MontagsMalerController extends AppCompatActivity {
     }
 
     private void initColorList() {
+        //top bar
         this.colorList.add(DrawingColor.WHITE);
         this.colorList.add(DrawingColor.LTBLUE);
         this.colorList.add(DrawingColor.RED);
         this.colorList.add(DrawingColor.ORANGE);
         this.colorList.add(DrawingColor.YELLOW);
-
+        //bottom bar
         this.colorList.add(DrawingColor.DKGRAY);
         this.colorList.add(DrawingColor.GREEN);
         this.colorList.add(DrawingColor.BLUE);

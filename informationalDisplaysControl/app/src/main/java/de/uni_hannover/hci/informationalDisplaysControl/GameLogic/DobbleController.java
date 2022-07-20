@@ -21,17 +21,14 @@ import android.widget.Toast;
 public class DobbleController extends AppCompatActivity {
 
     private TextView roundsInput;
-    private final int MIN_PLAYERS = 2;
+    private final int MIN_PLAYERS = 3;
     private boolean isGameRunning = false;
     private Dobble dobble;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dobble);
-
 
         this.roundsInput = findViewById(R.id.roundsInput);
         BLEServiceInstance.getBLEService().writeCharacteristicToAll(BLEService.MODE_CHARACTERISTIC_UUID, "5");
@@ -45,13 +42,11 @@ public class DobbleController extends AppCompatActivity {
             String s = roundsInput.getText().toString();
             rounds = Integer.parseInt(s);
         }
-        System.out.println("number of rounds: " + rounds);
         return rounds;
     }
 
     public void startGame(View view) {
         int numberOfPlayers = Devices.getDeviceCount();
-        //numberOfPlayers = 1;
         if (numberOfPlayers < MIN_PLAYERS) {
             Toast msg = Toast.makeText(this, "Not enough players! 3 players are needed!", Toast.LENGTH_SHORT);
             msg.show();
@@ -87,13 +82,14 @@ public class DobbleController extends AppCompatActivity {
                     }
                 }
             });
+
             if(!isGameRunning) {
                 isGameRunning = true;
                 waitGame.start();
             }
             else {
                 //start button no use while game running
-                System.out.println("GAME IS ALREADY RUNNING!");
+                Log.i("testbt", "Game is already running!");
             }
         }
 
@@ -109,7 +105,6 @@ public class DobbleController extends AppCompatActivity {
             if (BLEService.ACTION_DATA_AVAILABLE.equals(action)) {
                 final String data = intent.getStringExtra("BUTTON_DATA");
                 if (data.equals("PRESSED")){
-                    System.out.println("Reveicing: Button pressed!");
                     BLEServiceInstance.setControllerOptions(dobble.deviceMacList, "", false);
                     dobble.whoPressed = address;
                     dobble.buttonPressed = true;
@@ -117,15 +112,13 @@ public class DobbleController extends AppCompatActivity {
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException interruptedException) {
-                        System.out.println("Interrupted while button disabled!");
+                        Log.i("testbt", "Interrupted during button timeout!");
                     }
                     BLEServiceInstance.setControllerOptions(dobble.deviceMacList, "", true);
-                    //BLEServiceInstance.getBLEService().setCharacteristicNotification(device, BLEService.BUTTON_CHARACTERISTIC_UUID, enableButton);
                 }
             }
         }
     };
-
 
     @Override
     protected void onResume() {

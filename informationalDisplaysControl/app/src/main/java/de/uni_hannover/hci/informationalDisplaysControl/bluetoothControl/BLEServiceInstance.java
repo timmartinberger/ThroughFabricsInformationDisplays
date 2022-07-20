@@ -70,13 +70,11 @@ public class BLEServiceInstance extends Application {
     public static void sendSymbolsToPlayers(ArrayList<ArrayList<Symbol>> playersSymbols, ArrayList<String> deviceMacList) {
         int playerNr = 0;
         for(ArrayList<Symbol> list : playersSymbols) {
-            //printSymbolArray(list, playerNr);
             try {
-                //byte[] data = getSymbolBytes(playersSymbols.get(playerNr));
                 byte[] data = getSymbolBytes(list);
                 BLEServiceInstance.getBLEService().writeCharacteristic(deviceMacList.get(playerNr), BLEService.DATA_CHARACTERISTIC_UUID, data);
             } catch (Exception e) {
-                System.out.println("Failed sending!");
+                Log.i("testbt", "Failed sending data");
             }
             playerNr++;
         }
@@ -105,17 +103,16 @@ public class BLEServiceInstance extends Application {
 
     public static void sendPlayerPoints(String address, int points, int colorCode) {
         byte[] data = {(byte)((points+1) & 0xFF), (byte)((colorCode+1) & 0xFF)};
-        System.out.println("points: " + points + "      colorCode: " +colorCode);
         BLEServiceInstance.getBLEService().writeCharacteristic(address, BLEService.MODE_CHARACTERISTIC_UUID, "7");
         try {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
-                //
+                Log.i("testbt", "Interrupted while sleeping");
             }
             BLEServiceInstance.getBLEService().writeCharacteristic(address, BLEService.DATA_CHARACTERISTIC_UUID, data);
         } catch (Exception e) {
-            System.out.println("Failed sending!");
+            Log.i("testbt", "Failed sending data");
         }
     }
 }

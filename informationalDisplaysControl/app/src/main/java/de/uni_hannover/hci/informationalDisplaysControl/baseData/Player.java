@@ -4,10 +4,7 @@ import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.BLEServ
 
 public class Player {
 
-    private String address;
-
-
-
+    private final String address;
     private int points;
 
     public Player(String address) {
@@ -21,11 +18,9 @@ public class Player {
 
     public void updatePoints(boolean isCorrect) {
         if(isCorrect) {
-            System.out.println("CORRET! :)");
             this.points++;
         }
         else {
-            System.out.println("this was incorrect!");
             this.points--;
         }
     }
