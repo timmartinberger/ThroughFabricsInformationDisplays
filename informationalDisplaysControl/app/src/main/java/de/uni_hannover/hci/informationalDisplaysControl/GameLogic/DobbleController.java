@@ -54,13 +54,12 @@ public class DobbleController extends AppCompatActivity {
 
     public void startGame(View view) {
         int numberOfPlayers = Devices.getDeviceCount();
-        //numberOfPlayers = 1;
+        //numberOfPlayers = 2;
         if (numberOfPlayers < MIN_PLAYERS) {
             Toast msg = Toast.makeText(this, "Not enough players! 3 players are needed!", Toast.LENGTH_SHORT);
             msg.show();
         } else {
             Button stopGameButton = findViewById(R.id.stopGameButton);
-            System.out.println("Starting the game!");
             dobble = new Dobble(getRounds(), numberOfPlayers);
             Thread thread = new Thread(dobble);
             Thread waitGame = new Thread(new Runnable() {
@@ -68,6 +67,7 @@ public class DobbleController extends AppCompatActivity {
                 public void run() {
                         try {
                             isGameRunning=true;
+                            System.out.println("Starting the game!");
                             thread.start();
                             thread.join();
                             System.out.println("Game finished!");
@@ -86,13 +86,14 @@ public class DobbleController extends AppCompatActivity {
                 public void onClick(View view) {
                     if(isGameRunning) {
                         waitGame.interrupt();
-                        //thread.interrupt();
+                        thread.interrupt();
                         isGameRunning = false;
                         System.out.println("STOPPING THE GAME...");
                     }
                 }
             });
             if(!isGameRunning) {
+                isGameRunning = true;
                 waitGame.start();
             }
             else {
