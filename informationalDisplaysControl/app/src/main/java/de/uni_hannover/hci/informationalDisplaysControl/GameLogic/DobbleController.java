@@ -21,7 +21,7 @@ import android.widget.Toast;
 public class DobbleController extends AppCompatActivity {
 
     private TextView roundsInput;
-    private final int MIN_PLAYERS = 1;
+    private final int MIN_PLAYERS = 2;
     private boolean isGameRunning = false;
     private Dobble dobble;
 
@@ -109,6 +109,7 @@ public class DobbleController extends AppCompatActivity {
             if (BLEService.ACTION_DATA_AVAILABLE.equals(action)) {
                 final String data = intent.getStringExtra("BUTTON_DATA");
                 if (data.equals("PRESSED")){
+                    System.out.println("Reveicing: Button pressed!");
                     BLEServiceInstance.setControllerOptions(dobble.deviceMacList, "", false);
                     dobble.whoPressed = address;
                     dobble.buttonPressed = true;

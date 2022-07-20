@@ -1,12 +1,13 @@
 package de.uni_hannover.hci.informationalDisplaysControl.GameLogic;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import de.uni_hannover.hci.informationalDisplaysControl.baseData.DrawingColor;
+import de.uni_hannover.hci.informationalDisplaysControl.baseData.Player;
 import de.uni_hannover.hci.informationalDisplaysControl.baseData.Symbol;
 import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.BLEServiceInstance;
 import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.Devices;
@@ -24,6 +25,7 @@ public class Dobble extends Thread {
     public volatile boolean buttonPressed = false;
     public ArrayList<String> deviceMacList = new ArrayList<>();
     public volatile String whoPressed = "";
+    private String whoPressedForPoints;
 
 
     public Dobble(int rounds, int numberOfPlayers) {
@@ -56,6 +58,7 @@ public class Dobble extends Thread {
         Symbol currentSymbol;
 
         initDeviceMacList(deviceMacList);
+        ArrayList<Player> players = generatePlayerList();
         BLEServiceInstance.setControllerOptions(deviceMacList, "6", true);
         //round loop
         for(int i = 0; i < rounds; i++) {
@@ -68,7 +71,7 @@ public class Dobble extends Thread {
                 waitForInput(300);
                 //Thread.sleep(10000);
             } catch (InterruptedException e) {
-                endGame(deviceMacList);
+                endGame();
                 return;
             }
             //decide who pressed first
@@ -76,10 +79,9 @@ public class Dobble extends Thread {
             try {
                 waitForInput(300);
             } catch (InterruptedException e) {
-                endGame(deviceMacList);
+                endGame();
                 return;
             }
-
             //send currentSymbol to all players
             BLEServiceInstance.sendSymbolsToPlayers(singleSymbolList(currentSymbol), deviceMacList);
             //get signal
@@ -87,19 +89,90 @@ public class Dobble extends Thread {
                 //Thread.sleep(10000);
                 waitForInput(300);
             } catch (InterruptedException e) {
-                endGame(deviceMacList);
+                endGame();
                 return;
                 // button pressed, continue
             }
+            setPlayerPoints(players);
             //repeat game
         }
+        analyzePlayerPoints(players);
+
+    }
+
+    private void setPlayerPoints(ArrayList<Player> players) {
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException interruptedException) {
+            System.out.println("Stopped!");
+        }
+        Player player = null;
+        for(Player p: players) {
+            if(p.getAddress().equals(whoPressedForPoints)) {
+                player = p;
+            }
+        }
+        try {
+            player.updatePoints(!whoPressed.equals(whoPressedForPoints));
+        } catch (Exception e) {
+            endGame();
+        }
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException interruptedException) {
+            System.out.println("Stopped!");
+        }
+    }
+
+    private void analyzePlayerPoints(ArrayList<Player> players) {
+        ArrayList<Player> highestPlayers = new ArrayList<>();
+        System.out.println("Calculating points...");
+        int highscore = 0;
+        for(Player player : players) {
+            if(player.getPoints() > highscore) {
+                highscore = player.getPoints();
+            }
+        }
+        for(Player player : players) {
+            if(player.getPoints() >= highscore) {
+                highestPlayers.add(player);
+            }
+        }
+        int highscoreColor;
+        if(highestPlayers.size() > 1) {
+            highscoreColor = DrawingColor.YELLOW.getColorCode();
+        } else {
+            highscoreColor = DrawingColor.GREEN.getColorCode();
+        }
+        for(Player player : players) {
+            if(highestPlayers.contains(player)) {
+                player.showPoints(highscoreColor);
+            } else {
+                player.showPoints(DrawingColor.RED.getColorCode());
+            }
+        }
+        System.out.println("Showing Points");
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException interruptedException) {
+            System.out.println("Stopped!");
+        }
+        endGame();
+    }
+
+    private ArrayList<Player> generatePlayerList() {
+        ArrayList<Player> players = new ArrayList<>();
+        for(String address: deviceMacList) {
+            players.add(new Player(address));
+        }
+        return players;
     }
 
     private Symbol getRoundSymbol() {
         return symbolList.get(random.nextInt(symbolList.size()));
     }
 
-    private void endGame(ArrayList<String> deviceMacList) {
+    private void endGame() {
         System.out.println("Game stopped!!!");
         BLEServiceInstance.setControllerOptions(deviceMacList, "5", false);
 
@@ -201,6 +274,7 @@ public class Dobble extends Thread {
         ArrayList<String> firstPressed = new ArrayList<>();
         firstPressed.add(whoPressed);
         BLEServiceInstance.sendTurnCodeToPlayers(CIRCLE_CODE, firstPressed);
+        whoPressedForPoints = whoPressed;
         whoPressed = "";
         BLEServiceInstance.sendTurnCodeToPlayers(CROSS_Code, lastPressed);
         try {

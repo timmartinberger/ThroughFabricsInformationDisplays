@@ -102,4 +102,20 @@ public class BLEServiceInstance extends Application {
             }
         }
     }
+
+    public static void sendPlayerPoints(String address, int points, int colorCode) {
+        byte[] data = {(byte)((points+1) & 0xFF), (byte)((colorCode+1) & 0xFF)};
+        System.out.println("points: " + points + "      colorCode: " +colorCode);
+        BLEServiceInstance.getBLEService().writeCharacteristic(address, BLEService.MODE_CHARACTERISTIC_UUID, "7");
+        try {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                //
+            }
+            BLEServiceInstance.getBLEService().writeCharacteristic(address, BLEService.DATA_CHARACTERISTIC_UUID, data);
+        } catch (Exception e) {
+            System.out.println("Failed sending!");
+        }
+    }
 }
