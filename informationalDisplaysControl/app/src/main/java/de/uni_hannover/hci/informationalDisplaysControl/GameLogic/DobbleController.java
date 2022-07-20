@@ -51,7 +51,7 @@ public class DobbleController extends AppCompatActivity {
 
     public void startGame(View view) {
         int numberOfPlayers = Devices.getDeviceCount();
-        numberOfPlayers = 1;
+        //numberOfPlayers = 1;
         if (numberOfPlayers < MIN_PLAYERS) {
             Toast msg = Toast.makeText(this, "Not enough players! 3 players are needed!", Toast.LENGTH_SHORT);
             msg.show();
@@ -114,9 +114,9 @@ public class DobbleController extends AppCompatActivity {
                     dobble.buttonPressed = true;
                     //disable button for some time
                     try {
-                        Thread.sleep(2000);
+                        Thread.sleep(1000);
                     } catch (InterruptedException interruptedException) {
-                        interruptedException.printStackTrace();
+                        System.out.println("Interrupted while button disabled!");
                     }
                     BLEServiceInstance.setControllerOptions(dobble.deviceMacList, "", true);
                     //BLEServiceInstance.getBLEService().setCharacteristicNotification(device, BLEService.BUTTON_CHARACTERISTIC_UUID, enableButton);

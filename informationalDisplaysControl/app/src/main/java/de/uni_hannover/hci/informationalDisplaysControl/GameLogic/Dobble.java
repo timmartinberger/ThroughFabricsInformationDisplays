@@ -21,9 +21,9 @@ public class Dobble extends Thread {
     private final int rounds;
     final private ArrayList<Symbol> symbolList = new ArrayList<>();
     final private Random random = new Random();
-    public boolean buttonPressed = false;
+    public volatile boolean buttonPressed = false;
     public ArrayList<String> deviceMacList = new ArrayList<>();
-    public String whoPressed = "";
+    public volatile String whoPressed = "";
 
 
     public Dobble(int rounds, int numberOfPlayers) {
@@ -194,13 +194,19 @@ public class Dobble extends Thread {
         try {
             Thread.sleep(100);
         } catch (InterruptedException interruptedException) {
-            interruptedException.printStackTrace();
+            System.out.println("Stopped!");
         }
         ArrayList<String> lastPressed = new ArrayList<>(deviceMacList);
         lastPressed.remove(whoPressed);
         ArrayList<String> firstPressed = new ArrayList<>();
         firstPressed.add(whoPressed);
-        BLEServiceInstance.sendTurnCodeToPlayers(CROSS_Code, lastPressed);
         BLEServiceInstance.sendTurnCodeToPlayers(CIRCLE_CODE, firstPressed);
+        whoPressed = "";
+        BLEServiceInstance.sendTurnCodeToPlayers(CROSS_Code, lastPressed);
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException interruptedException) {
+            System.out.println("Stopped!");
+        }
     }
 }
