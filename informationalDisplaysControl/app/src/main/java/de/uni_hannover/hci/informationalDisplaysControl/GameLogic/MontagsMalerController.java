@@ -14,9 +14,11 @@ import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -48,6 +50,8 @@ public class MontagsMalerController extends AppCompatActivity {
     private List<String> drawableImagesList = new ArrayList<>();
     private List<String> availableImages = new ArrayList<>();
 
+
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,6 +65,7 @@ public class MontagsMalerController extends AppCompatActivity {
 
         initTable();
         initColors();
+
         this.rootState = getBoardState();
         BLEServiceInstance.getBLEService().writeCharacteristicToAll(BLEService.MODE_CHARACTERISTIC_UUID, "4");
 
@@ -72,6 +77,7 @@ public class MontagsMalerController extends AppCompatActivity {
         Collections.shuffle(availableImages);
         toBeDrawn.setTextSize(24);
         setRandomDrawableSymbol();
+
     }
 
     private void setRandomDrawableSymbol() {
@@ -90,7 +96,7 @@ public class MontagsMalerController extends AppCompatActivity {
         setRandomDrawableSymbol();
     }
 
-    @SuppressLint("ClickableViewAccessibility")
+    @SuppressLint("UseCompatLoadingForDrawables")
     private ImageView generateColorPickerElement(DrawingColor color) {
         ImageView colorObject = new ImageView(this);
         colorObject.setImageDrawable(getDrawable(R.drawable.color_object));
@@ -99,22 +105,6 @@ public class MontagsMalerController extends AppCompatActivity {
                 LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         params.setMargins(16,16,16,16);
         colorObject.setLayoutParams(params);
-
-        // Listener to set color
-        colorObject.setOnTouchListener(new View.OnTouchListener() {
-            @SuppressLint("ClickableViewAccessibility")
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if(event.getAction() == MotionEvent.ACTION_MOVE){
-
-                    // Do what you want
-                    return true;
-                }
-                return false;
-            }
-        });
-
-
         colorObject.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -126,15 +116,17 @@ public class MontagsMalerController extends AppCompatActivity {
         return colorObject;
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private ImageView generatePixelElement(DrawAction action) {
         ImageView pixelObject = new ImageView(this);
         pixelObject.setImageDrawable(getDrawable(R.drawable.pixel_object));
         pixelObject.setPadding(4, 4, 4, 4);
         pixelObject.setTag(action);
+        // Listener to set color
         pixelObject.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DrawAction oldState = (DrawAction)pixelObject.getTag();
+                DrawAction oldState = (DrawAction) pixelObject.getTag();
                 actionList.add(oldState);
                 DrawAction newState = new DrawAction(oldState.position, oldState.boardState, selectedColor);
                 pixelObject.setTag(newState);

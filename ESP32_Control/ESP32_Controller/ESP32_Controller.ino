@@ -522,6 +522,7 @@ void setup() {
 char prev_MODE = '0';
 char MODE = '0';
 boolean painting = false;
+int buttonPressed = 0;
 
 
 void loop() {
@@ -617,21 +618,27 @@ void loop() {
   }
 
   // Code example to check button state
-  if (digitalRead(buttonPin) == 1){
-    Serial.println("BUTTON PRESSED!");
+  if (digitalRead(buttonPin) == 0 && buttonPressed == 0){
+      Serial.println("BUTTON PRESSED!");
+      char* buttonState = "1";
+      buttonCharacteristic->setValue(buttonState);
+      buttonCharacteristic->notify(); 
+      delay(25);
+      buttonCharacteristic->setValue("0");
+      buttonPressed++;
+  } else if (digitalRead(buttonPin) == 0){
+    buttonPressed++;
   } else {
+    buttonPressed = false;
     Serial.println("BUTTON NOT PRESSED!");
-  }
   
-  /*
-  if(deviceConnected && digitalRead(buttonPin)){
-    char* buttonState = "1";
-    buttonCharacteristic->setValue(buttonState);
-    buttonCharacteristic->notify(); 
-    delay(50);
-    buttonCharacteristic->setValue("0");
   }
-  */  
+
+  if(buttonPressed == 50 && deviceConnected){
+    exit(0);
+    buttonPressed = 0;
+  }
+
   delay(100);
 
 

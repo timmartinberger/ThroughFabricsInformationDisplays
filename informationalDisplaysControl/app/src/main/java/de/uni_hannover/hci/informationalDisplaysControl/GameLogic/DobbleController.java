@@ -8,6 +8,7 @@ import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.BLEServ
 import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.BLEServiceInstance;
 import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.Devices;
 
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothGattService;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -29,6 +30,7 @@ public class DobbleController extends AppCompatActivity {
     private Thread gameThread;
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,6 +38,7 @@ public class DobbleController extends AppCompatActivity {
 
 
         this.roundsInput = findViewById(R.id.roundsInput);
+        roundsInput.setText("10\n");
         BLEServiceInstance.getBLEService().writeCharacteristicToAll(BLEService.MODE_CHARACTERISTIC_UUID, "5");
         OnBackPressedCallback endDobbleCallback = Utils.endGameCallback(this);
         this.getOnBackPressedDispatcher().addCallback(this, endDobbleCallback);
