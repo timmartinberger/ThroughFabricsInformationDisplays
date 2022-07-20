@@ -27,6 +27,7 @@ public class DobbleController extends AppCompatActivity {
     private final int MIN_PLAYERS = 2;
     private boolean isGameRunning = false;
     private Thread gameThread;
+    private Dobble dobble;
 
 
     @Override
@@ -60,7 +61,7 @@ public class DobbleController extends AppCompatActivity {
         } else {
             Button stopGameButton = findViewById(R.id.stopGameButton);
             System.out.println("Starting the game!");
-            Dobble dobble = new Dobble(this, getRounds(), numberOfPlayers);
+            dobble = new Dobble(getRounds(), numberOfPlayers);
             Thread thread = new Thread(dobble);
             Thread waitGame = new Thread(new Runnable() {
                 @Override
@@ -111,10 +112,7 @@ public class DobbleController extends AppCompatActivity {
             if (BLEService.ACTION_DATA_AVAILABLE.equals(action)) {
                 final String data = intent.getStringExtra("BUTTON_DATA");
                 if (data.equals("PRESSED")){
-                    // Todo: hier kannst du etwas tun wenn "address" den Button gedrückt hat
-                    // ...
-                    // ...
-
+                    dobble.buttonPressed = true;
                 }
             }
         }

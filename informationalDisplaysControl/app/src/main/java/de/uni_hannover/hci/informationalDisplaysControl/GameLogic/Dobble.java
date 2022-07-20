@@ -25,14 +25,12 @@ public class Dobble extends Thread {
     private final int rounds;
     final private ArrayList<Symbol> symbolList = new ArrayList<>();
     final private Random random = new Random();
-    private final Context context;
     public boolean buttonPressed = false;
 
 
-    public Dobble(Context context, int rounds, int numberOfPlayers) {
+    public Dobble(int rounds, int numberOfPlayers) {
         this.rounds = rounds;
         this.numberOfPlayers = numberOfPlayers;
-        this.context = context;
         this.symbolList.addAll(Arrays.stream(Symbol.values()).collect(Collectors.toList()));
         this.currentMaxSymbols = generateCurrentMaxSymbols();
     }
@@ -65,8 +63,6 @@ public class Dobble extends Thread {
         //round loop
         setBTMode(deviceMacList, "6", true);
         for(int i = 0; i < rounds; i++) {
-            Toast msg = Toast.makeText(context, "Round: " + i + "/" + rounds, Toast.LENGTH_SHORT);
-            msg.show();
             currentSymbol = getRoundSymbol();
             //init player display
             playersSymbols = getPlayersSymbols(currentSymbol);
@@ -83,7 +79,7 @@ public class Dobble extends Thread {
 
             System.out.println("+++++++++++++++++++");
             try {
-                waitForInput();
+                waitForInput(300);
                 //Thread.sleep(10000);
             } catch (InterruptedException e) {
                 endGame(deviceMacList);
@@ -94,7 +90,7 @@ public class Dobble extends Thread {
             //get signal
             try {
                 //Thread.sleep(10000);
-                waitForInput();
+                waitForInput(300);
             } catch (InterruptedException e) {
                 endGame(deviceMacList);
                 return;
@@ -133,9 +129,8 @@ public class Dobble extends Thread {
         return playersSymbols;
     }
 
-    private void waitForInput() throws InterruptedException {
-        final int MAX_WAIT_DURATION = 60;
-        for(int i = 0; i < MAX_WAIT_DURATION; i++) {
+    private void waitForInput(int waitDuration) throws InterruptedException {
+        for(int i = 0; i < waitDuration; i++) {
             if(buttonPressed) {
                 buttonPressed = false;
                 System.out.println("Button Pressed!");
