@@ -28,13 +28,20 @@ public enum Symbol {
     BASEBALL,
     BIRD,
     DIAMOND,
-    GARBAGE;
+    GARBAGE,
+    MAGNIFIER,
+    CAT,
+    HOUSE,
+    PENCIL,
+    SHIELD;
+
     // 0: apple, 1: key, 2: tree, 3: moon, 4: clock, 5: cactus,
     // 6: earth, 7: yingyang, 8: lock, 9: lightning, 10: heart,
     // 11: bell, 12: cheries, 13: music, 14: question mark,
     // 15: star, 16: beer, 17: ghost, 18: flower, 19: mecces,
     // 20: trophy, 21: sword, 22: duck, 23: crown, 24: baseball,
-    // 25: bird, 26: diamond, 27: garbage
+    // 25: bird, 26: diamond, 27: garbage, 28: magnifier,
+    //  29: cat, 30: house, 31: pencil, 32: shield,
 
     public int getCode() {
         switch(this) {
@@ -94,6 +101,16 @@ public enum Symbol {
                 return 26;
             case GARBAGE:
                 return 27;
+            case MAGNIFIER:
+                return 28;
+            case CAT:
+                return 29;
+            case HOUSE:
+                return 30;
+            case PENCIL:
+                return 31;
+            case SHIELD:
+                return 32;
             default:
                 return 0;
         }
