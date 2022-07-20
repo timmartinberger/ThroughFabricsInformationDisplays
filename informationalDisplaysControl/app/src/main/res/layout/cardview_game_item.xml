@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="10dp"
-    app:cardBackgroundColor="@color/cardview_dark_background"
+    app:cardBackgroundColor="@color/theme_main"
 
     app:cardCornerRadius="10dp"
     app:cardElevation="15dp"
@@ -28,14 +28,14 @@
             android:id="@+id/gameTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/app_name"
+            android:text="@string/short_description"
             android:layout_gravity="bottom|center_horizontal"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="10dp"
             android:textSize="25sp"
             android:textStyle="bold"
-            android:layout_marginLeft="10dp"
-            android:layout_marginStart="10dp" />
+            android:layout_marginLeft="20dp"
+            android:layout_marginStart="20dp" />
 
         <TextView
             android:id="@+id/gameDescription"
@@ -44,13 +44,14 @@
             android:text="@string/app_name"
             android:layout_marginBottom="10dp"
             android:textSize="20sp"
+            android:justificationMode="inter_word"
             android:layout_below="@id/gameTitle"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:layout_marginLeft="15dp"
-            android:layout_marginStart="15dp"
-            android:layout_marginRight="15dp"
-            android:layout_marginEnd="15dp"/>
+            android:layout_marginLeft="20dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginEnd="30dp"/>
 
     </RelativeLayout>
 </androidx.cardview.widget.CardView>

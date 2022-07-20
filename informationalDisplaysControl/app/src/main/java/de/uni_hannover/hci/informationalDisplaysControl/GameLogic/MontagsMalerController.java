@@ -2,6 +2,10 @@ package de.uni_hannover.hci.informationalDisplaysControl.GameLogic;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearSmoothScroller;
+import androidx.recyclerview.widget.RecyclerView;
+
+import de.uni_hannover.hci.informationalDisplaysControl.GameMenu;
 import de.uni_hannover.hci.informationalDisplaysControl.R;
 import de.uni_hannover.hci.informationalDisplaysControl.Utils;
 import de.uni_hannover.hci.informationalDisplaysControl.baseData.DrawingColor;
@@ -14,6 +18,8 @@ import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
 import android.view.MotionEvent;
@@ -23,6 +29,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -51,7 +58,7 @@ public class MontagsMalerController extends AppCompatActivity {
     private List<String> availableImages = new ArrayList<>();
 
 
-    @SuppressLint("ClickableViewAccessibility")
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +67,13 @@ public class MontagsMalerController extends AppCompatActivity {
         table = findViewById(R.id.table);
         fillButton = findViewById(R.id.fillBoardButton);
         toBeDrawn = findViewById(R.id.toDrawTextView);
+
+        TextView gameDes = findViewById(R.id.gameDescription);
+        gameDes.setVisibility(View.VISIBLE);
+        gameDes.setText(R.string.drawing_guessing_description);
+
+        ImageView imageView = findViewById(R.id.gameImage);
+        imageView.setImageDrawable(getDrawable(R.drawable.drawing_and_guessing));
 
         initColorList();
 
@@ -77,6 +91,15 @@ public class MontagsMalerController extends AppCompatActivity {
         Collections.shuffle(availableImages);
         toBeDrawn.setTextSize(24);
         setRandomDrawableSymbol();
+
+        ScrollView scrollView = findViewById(R.id.scrollmm);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                scrollView.smoothScrollTo(0, toBeDrawn.getTop());
+            }
+        }, 2000);
+
 
     }
 

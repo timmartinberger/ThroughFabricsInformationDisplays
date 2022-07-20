@@ -4,12 +4,17 @@
     <!--  Game Names  -->
     <string name="who_am_i">Who am I?</string>
     <string name="dobble">Dobble</string>
-    <string name="four_wins">Connect 4</string>
     <string name="send_text">Send Text</string>
     <string name="drawing_guessing">Drawing and Guessing</string>
+
+    <string name="who_am_i_description">This is a guessing game where players use yes or no questions to guess the identity of a famous person or fictional character.</string>
+    <string name="dobble_description">Each players matrix contains eight symbols. Be the first to find the one to occur on all matrices.</string>
+    <string name="send_text_description">Send a any text to the LED Matrices.</string>
+    <string name="drawing_guessing_description">One player has to paint a something specific and the others have to guess what it is.</string>
 
     <!--  Activity names  -->
     <string name="title_activity_game_menu">SELECT A GAME</string>
     <string name="bluetooth_devices">BLUETOOTH DEVICES</string>
+    <string name="short_description">SHORT DESCRIPTION</string>
 
 </resources>

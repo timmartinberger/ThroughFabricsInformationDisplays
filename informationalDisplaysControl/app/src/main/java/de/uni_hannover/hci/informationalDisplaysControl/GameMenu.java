@@ -35,7 +35,7 @@ import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.Devices
 
 public class GameMenu extends AppCompatActivity {
 
-    private ArrayList<Game> gameList;
+    public static ArrayList<Game> games;
     private RecyclerView RVGames;
 
     private boolean serviceBound;
@@ -51,14 +51,14 @@ public class GameMenu extends AppCompatActivity {
 
         // Create List of games
         // TODO: Create the games here
-        gameList = new ArrayList<>();
+        games = new ArrayList<>();
 
-        gameList.add(new Game(getString(R.string.dobble), "Each players matrix contains eight symbols. Be the first to find the one to occur on all matrices.", getDrawable(R.drawable.dobble), DobbleController.class));
-        gameList.add(new Game(getString(R.string.who_am_i), "This is a guessing game where players use yes or no questions to guess the identity of a famous person or fictional character.", getDrawable(R.drawable.whoami_darker), WhoAmI.class));
-        gameList.add(new Game(getString(R.string.drawing_guessing), "One player has to paint a something specific and the others have to guess what it is.", getDrawable(R.drawable.drawing_and_guessing), MontagsMalerController.class));
-        gameList.add(new Game(getString(R.string.send_text), "Send a any text to the LED Matrices", null, SendText.class));
+        games.add(new Game(getString(R.string.dobble), "Each players matrix contains eight symbols. Be the first to find the one to occur on all matrices.", getDrawable(R.drawable.dobble), DobbleController.class));
+        games.add(new Game(getString(R.string.who_am_i), "This is a guessing game where players use yes or no questions to guess the identity of a famous person or fictional character.", getDrawable(R.drawable.whoami_darker), WhoAmI.class));
+        games.add(new Game(getString(R.string.drawing_guessing), "One player has to paint a something specific and the others have to guess what it is.", getDrawable(R.drawable.drawing_and_guessing), MontagsMalerController.class));
+        games.add(new Game(getString(R.string.send_text), "Send a any text to the LED Matrices", getDrawable(R.drawable.send_text), SendText.class));
 
-        GameAdapter gameAdapter = new GameAdapter(this, gameList);
+        GameAdapter gameAdapter = new GameAdapter(this, games);
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         RVGames.setLayoutManager(linearLayoutManager);

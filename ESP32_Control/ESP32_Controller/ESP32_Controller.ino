@@ -58,7 +58,7 @@ int colors[] = {63488, 2110, 65504, 64512, 59608, 16968, 4064, 14593, 65535, 150
 // 20: trophy, 21: sword, 22: duck, 23: crown, 24: baseball,
 // 25: bird, 26: diamond, 27: garbage, 28: magnifier,
 // 29: cat, 30: house, 31: pencil, 32: shield, 33: circle, 34: cross 
-union iconCollection {
+union iconCollection {  
   int ico[35][64] = {
     { // apple
       0, 0, 0, 0, 14593, 0, 0, 0, 
@@ -379,6 +379,27 @@ union iconCollection {
   };
 } icons;
 
+int logo[512] = {
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 28501, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 28501, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 28501, 28501, 28501, 28501, 28501, 28501, 28501, 28501, 28501, 28501, 28501, 28501, 28501, 28501, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 28501, 28501, 28501, 28501, 28501, 28501, 28501, 28501, 28501, 28501, 28501, 28501, 28501, 28501, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+  0, 0, 0, 0, 0, 0, 0, 28501, 28501, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 28501, 28501, 0, 0, 0, 0, 0, 0, 0, 
+  0, 0, 0, 0, 0, 0, 0, 28501, 28501, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 28501, 28501, 0, 0, 0, 0, 0, 0, 0, 
+  0, 0, 0, 0, 0, 28501, 28501, 0, 0, 65535, 65535, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1503, 1503, 0, 0, 28501, 28501, 0, 0, 0, 0, 0, 
+  0, 0, 0, 0, 0, 28501, 28501, 0, 0, 65535, 65535, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1503, 1503, 0, 0, 28501, 28501, 0, 0, 0, 0, 0, 
+  0, 0, 0, 0, 0, 28501, 28501, 65535, 65535, 0, 0, 65535, 65535, 0, 0, 0, 0, 0, 0, 4064, 4064, 0, 0, 63488, 63488, 28501, 28501, 0, 0, 0, 0, 0, 
+  0, 0, 0, 0, 0, 28501, 28501, 65535, 65535, 0, 0, 65535, 65535, 0, 0, 0, 0, 0, 0, 4064, 4064, 0, 0, 63488, 63488, 28501, 28501, 0, 0, 0, 0, 0, 
+  0, 0, 0, 0, 0, 28501, 28501, 0, 0, 65535, 65535, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 65504, 65504, 0, 0, 28501, 28501, 0, 0, 0, 0, 0, 
+  0, 0, 0, 0, 0, 28501, 28501, 0, 0, 65535, 65535, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 65504, 65504, 0, 0, 28501, 28501, 0, 0, 0, 0, 0, 
+  0, 0, 0, 0, 0, 0, 0, 28501, 28501, 0, 0, 0, 0, 28501, 28501, 28501, 28501, 28501, 28501, 0, 0, 0, 0, 28501, 28501, 0, 0, 0, 0, 0, 0, 0, 
+  0, 0, 0, 0, 0, 0, 0, 28501, 28501, 0, 0, 0, 0, 28501, 28501, 28501, 28501, 28501, 28501, 0, 0, 0, 0, 28501, 28501, 0, 0, 0, 0, 0, 0, 0, 
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 28501, 28501, 28501, 28501, 0, 0, 0, 0, 0, 0, 28501, 28501, 28501, 28501, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 28501, 28501, 28501, 28501, 0, 0, 0, 0, 0, 0, 28501, 28501, 28501, 28501, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
+
+char* matrix_name = "pixx ink 1";
+
 char memblock[50];
 char* text;
 boolean drawing = false;
@@ -407,6 +428,21 @@ void drawText(void * pvParameters){
   handle_drawText = NULL;
   vTaskDelete(NULL);
 }
+
+void drawPoints(uint16_t color, char* pointsStr){
+  dma_display->setTextColor(color);
+  dma_display->fillScreen(dma_display->color444(0, 0, 0));
+
+  uint8_t w = 0;
+    dma_display->setCursor(10, 4);
+    for (w=0; w<strlen(text); w++) {
+      if (pointsStr[w] == '\0'){
+        return;
+      }
+      dma_display->print(pointsStr[w]);
+    }
+}
+
 
 void startDrawingThread(char* t){
   if(!drawing){
@@ -544,7 +580,7 @@ void setup() {
   
   // INIT BLUETOOTH ---------------------------------------------------------------------------------------
   // Setup device
-  BLEDevice::init("LED MATRIX_1");
+  BLEDevice::init(matrix_name);
   uint16_t mtu = 128;
   BLEDevice::setMTU(mtu);
   BLEServer *pServer = BLEDevice::createServer();
@@ -611,7 +647,9 @@ void loop() {
   // CONNECTED, BUT NOT READY YET - Not all devices connected, no game chosen, etc.
   else if (MODE == '1'){
     Serial.println("m1");
-    startDrawingThread("Connected!");
+    if (!drawing){
+      dma_display->drawIcon(logo, 0, 0, 32, 16);
+    }
   }
   // WHO AM I & Send Text
   else if (MODE == '2'){
@@ -677,12 +715,21 @@ void loop() {
 
       painting = true;
     }
+  } else if (MODE == '7'){
+    // value[0] = Punkte, value[1] = Farbe
+    char* value = (char*) dataCharacteristic->getValue().data();
+    uint16_t color = colors[(((int16_t)0x00 << 8) | value[1]) - 1];
+    int16_t points = (((int16_t)0x00 << 8) | value[0]) - 1;
+    char pointsStr[5];
+    sprintf(pointsStr, "%d", points);
+    drawPoints(color, pointsStr);
+    
   }
 
-  // Code example to check button state
+  // Check button states
   // blue button: digitRead == 1 --> PRESSED
   // black/red button: digitRead == 0 --> PRESSED
-  if (digitalRead(buttonPin) == 1 && buttonPressed == 0){
+  if (digitalRead(buttonPin) == 0 && buttonPressed == 0){
       Serial.println("BUTTON PRESSED!");
       char* buttonState = "1";
       buttonCharacteristic->setValue(buttonState);
@@ -690,14 +737,16 @@ void loop() {
       delay(25);
       buttonCharacteristic->setValue("0");
       buttonPressed++;
-  } else if (digitalRead(buttonPin) == 1){
+  } else if (digitalRead(buttonPin) == 0){
+    Serial.println("buttonPressed:");
+    Serial.println(buttonPressed);
     buttonPressed++;
   } else {
     buttonPressed = false;
-  
+    Serial.println("Not pressed");
   }
 
-  if(buttonPressed == 50 && deviceConnected){
+  if(buttonPressed >= 50 && deviceConnected){
     exit(0);
     buttonPressed = 0;
   }

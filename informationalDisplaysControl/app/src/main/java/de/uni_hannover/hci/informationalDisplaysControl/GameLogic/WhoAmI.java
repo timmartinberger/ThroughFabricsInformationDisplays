@@ -2,6 +2,7 @@ package de.uni_hannover.hci.informationalDisplaysControl.GameLogic;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 
 import de.uni_hannover.hci.informationalDisplaysControl.Utils;
 import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.*;
@@ -14,6 +15,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -30,6 +33,7 @@ public class WhoAmI extends AppCompatActivity {
     List<String> allNames = new ArrayList<>();
     private boolean serviceBound;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,6 +42,13 @@ public class WhoAmI extends AppCompatActivity {
         // Bind service
         Intent gattServiceIntent = new Intent(this, BLEService.class);
         serviceBound = this.bindService(gattServiceIntent, BLEServiceInstance.serviceConnection, Context.BIND_AUTO_CREATE);
+
+        TextView gameDes = findViewById(R.id.gameDescription);
+        gameDes.setVisibility(View.VISIBLE);
+        gameDes.setText(R.string.who_am_i_description);
+
+        ImageView imageView = findViewById(R.id.gameImage);
+        imageView.setImageDrawable(getDrawable(R.drawable.whoami_darker));
 
         BLEServiceInstance.getBLEService().writeCharacteristicToAll(BLEService.MODE_CHARACTERISTIC_UUID, "2");
         OnBackPressedCallback endWhoAmICallback = Utils.endGameCallback(this);

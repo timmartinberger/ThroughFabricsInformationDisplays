@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,6 +33,12 @@ public class DobbleController extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dobble);
 
+        TextView gameDes = findViewById(R.id.gameDescription);
+        gameDes.setVisibility(View.VISIBLE);
+        gameDes.setText(R.string.dobble_description);
+
+        ImageView imageView = findViewById(R.id.gameImage);
+        imageView.setImageDrawable(getDrawable(R.drawable.dobble));
 
         this.roundsInput = findViewById(R.id.roundsInput);
         BLEServiceInstance.getBLEService().writeCharacteristicToAll(BLEService.MODE_CHARACTERISTIC_UUID, "5");

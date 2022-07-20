@@ -36,6 +36,10 @@ public class Devices {
         return deviceAddress.get(index).toString().toUpperCase();
     }
 
+    public static String getName(int index){
+        return deviceNames.get(index);
+    }
+
     public static void removeDevice(MacAddress address){
         int idx = deviceAddress.indexOf(address);
         deviceNames.remove(idx);

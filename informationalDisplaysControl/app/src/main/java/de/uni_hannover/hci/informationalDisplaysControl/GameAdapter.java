@@ -43,9 +43,7 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.Viewholder> {
         // to set data to textview and imageview of each card layout
         Game model = gameList.get(position);
         holder.gameTitle.setText(model.getGameName());
-        holder.gameDescription.setText(model.getGameDescription());
         holder.gameImage.setImageDrawable(model.getGameImage());
-        holder.gameDescription.setJustificationMode(JUSTIFICATION_MODE_INTER_WORD);
     }
 
     @Override
@@ -65,8 +63,9 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.Viewholder> {
             super(itemView);
             itemView.setOnClickListener(this);
             gameTitle = itemView.findViewById(R.id.gameTitle);
-            gameDescription = itemView.findViewById(R.id.gameDescription);
             gameImage = itemView.findViewById(R.id.gameImage);
+            gameDescription = itemView.findViewById(R.id.gameDescription);
+            gameDescription.setVisibility(View.INVISIBLE);
         }
 
         @Override
