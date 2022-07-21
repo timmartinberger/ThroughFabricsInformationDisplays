@@ -1,10 +1,12 @@
 package de.uni_hannover.hci.informationalDisplaysControl;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.MacAddress;
 import android.os.Build;
@@ -118,11 +120,20 @@ public class DeviceList extends AppCompatActivity {
             }
         });
 
+        AlertDialog.Builder noDevices = new AlertDialog.Builder(this)
+                                        .setIcon(R.drawable.ic_baseline_videogame_asset_24)
+                                        .setTitle("Please select at least one device!")
+                                        .setNeutralButton("Okay", null);
+
         // Handlo click on "select" button
         btnGo.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
                 // Make an intent to start next activity.
+                if (Devices.getDeviceCount() < 1){
+                    noDevices.show();
+                    return;
+                }
                 Intent i = new Intent(DeviceList.this, GameMenu.class);
                 startActivity(i);
             }
@@ -190,7 +201,7 @@ public class DeviceList extends AppCompatActivity {
                 if (selected) {
                     Devices.addDevice(info, mcaddress);
                 } else {
-                    Devices.removeDevice(mcaddress);
+                    Devices.removeDevice(address);
                 }
             } catch (Exception e) {
                 e.printStackTrace();

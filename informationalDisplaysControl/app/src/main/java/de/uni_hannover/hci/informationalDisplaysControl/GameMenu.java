@@ -50,7 +50,6 @@ public class GameMenu extends AppCompatActivity {
         RVGames = findViewById(R.id.RVGames);
 
         // Create List of games
-        // TODO: Create the games here
         games = new ArrayList<>();
 
         games.add(new Game(getString(R.string.dobble), "Each players matrix contains eight symbols. Be the first to find the one to occur on all matrices.", getDrawable(R.drawable.dobble), DobbleController.class));
@@ -65,13 +64,12 @@ public class GameMenu extends AppCompatActivity {
         RVGames.setAdapter(gameAdapter);
 
         // Connect service
-        // todo change place of permission
         Utils.checkPermissions(this, this);
         Intent gattServiceIntent = new Intent(this, BLEService.class);
         serviceBound = this.bindService(gattServiceIntent, BLEServiceInstance.serviceConnection, Context.BIND_AUTO_CREATE);
 
         AlertDialog.Builder endGameMenu = new AlertDialog.Builder(this)
-                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setIcon(R.drawable.ic_baseline_videogame_asset_24)
                 .setTitle("Do you want to close the game menu?")
                 .setMessage("Your bluetooth devices will be disconnected!")
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -100,57 +98,38 @@ public class GameMenu extends AppCompatActivity {
     private final BroadcastReceiver gattUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            Log.i("testbt", "Broadcastreceiver got notification: " + action);
-            String address = intent.getStringExtra("ADDRESS");
-            // todo remove?
-            if (BLEService.ACTION_GATT_CONNECTED.equals(action)) {
+        final String action = intent.getAction();
+        Log.i("testbt", "Broadcastreceiver got notification: " + action);
+        String address = intent.getStringExtra("ADDRESS");
+        if (BLEService.ACTION_GATT_CONNECTED.equals(action)) {
 
-            }
-            else if (BLEService.ACTION_GATT_DISCONNECTED.equals(action)) {
-                Toast.makeText(getApplicationContext(), address + " disconnected!", Toast.LENGTH_LONG).show();
-            }
-            else if (BLEService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
-                Log.i("testbt", "Services found:");
+        }
+        else if (BLEService.ACTION_GATT_DISCONNECTED.equals(action)) {
+            Toast.makeText(getApplicationContext(), address + " disconnected!", Toast.LENGTH_LONG).show();
+        }
+        else if (BLEService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
+            Log.i("testbt", "Services found:");
 
-                List<BluetoothGattService> services = BLEServiceInstance.getBLEService().getSupportedGattServices(BLEServiceInstance.getBLEService().getGattByMAC(address));
-                for (BluetoothGattService service: services){
-                    if (service.getUuid().toString().equals(BLEService.SERVICE_UUID)){
-                        Toast.makeText(getApplicationContext(), address + " connected!", Toast.LENGTH_LONG).show();
-                        return;
-                    }
+            List<BluetoothGattService> services = BLEServiceInstance.getBLEService().getSupportedGattServices(BLEServiceInstance.getBLEService().getGattByMAC(address));
+            for (BluetoothGattService service: services){
+                if (service.getUuid().toString().equals(BLEService.SERVICE_UUID)){
+                    Toast.makeText(getApplicationContext(), address + " connected!", Toast.LENGTH_LONG).show();
+                    return;
                 }
-                Toast.makeText(getApplicationContext(), "Device with address " + address + " is not compatible!", Toast.LENGTH_LONG).show();
-                finish();
             }
-            else if (BLEService.ACTION_DATA_AVAILABLE.equals(action)) {
-                Bundle bundle = intent.getExtras();
-                if (bundle != null) {
-                    for (String key : bundle.keySet()) {
-                        Log.e("testbt", key + " : " + (bundle.get(key) != null ? bundle.get(key) : "NULL"));
-                    }
+            Toast.makeText(getApplicationContext(), "Device with address " + address + " is not compatible!", Toast.LENGTH_LONG).show();
+            finish();
+        }
+        else if (BLEService.ACTION_DATA_AVAILABLE.equals(action)) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                for (String key : bundle.keySet()) {
+                    Log.e("testbt", key + " : " + (bundle.get(key) != null ? bundle.get(key) : "NULL"));
                 }
             }
         }
+        }
     };
-
-
-
-
-    private static AlertDialog.Builder endGameDialog(AppCompatActivity context) {
-        return new AlertDialog.Builder(context)
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .setTitle("Do you want to end this game?")
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        BLEServiceInstance.getBLEService().writeCharacteristicToAll(BLEService.MODE_CHARACTERISTIC_UUID, "1");
-                        context.finish();
-                    }
-                })
-                .setNegativeButton("No", null);
-    }
-
 
     @Override
     protected void onResume() {

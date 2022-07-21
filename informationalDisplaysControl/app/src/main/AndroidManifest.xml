@@ -11,11 +11,11 @@
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED" />
 
-
     <permission
         android:name="android.permission.BLUETOOTH"
         android:label="BLUETOOTH" />
     <permission android:name="android.permission.BLUETOOTH_ADMIN" />
+
     <uses-feature
         android:name="android.hardware.bluetooth"
         android:required="false" />
@@ -23,19 +23,22 @@
         android:name="android.hardware.bluetooth_le"
         android:required="false" />
 
-
     <application
         android:name=".bluetoothControl.BLEServiceInstance"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppMainTheme">
+        android:theme="@style/AppMainTheme" >
+        <activity
+            android:name=".SendPicture"
+            android:exported="false" />
+
         <service android:name=".bluetoothControl.BLEService" />
 
         <activity
             android:name=".GameLogic.MontagsMalerController"
-            android:label="Drawing and Guessing"
-            android:exported="false" />
+            android:exported="false"
+            android:label="Drawing and Guessing" />
         <activity
             android:name=".GameLogic.DobbleController"
             android:exported="false"
@@ -63,7 +66,6 @@
         <activity
             android:name=".GameLogic.SendText"
             android:label="Send Text" />
-        <activity android:name=".GameLogic.MontagsMaler" />
     </application>
 
 </manifest>

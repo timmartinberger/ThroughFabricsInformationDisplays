@@ -38,13 +38,6 @@ MatrixPanel_I2S_DMA *dma_display = nullptr;
 // Button Pin
 const int buttonPin = 25; 
 
-
-uint16_t BLACK = dma_display->color565(0, 0, 0);
-uint16_t WHITE = dma_display->color565(255, 255, 255);
-uint16_t RED = dma_display->color565(255, 0, 0);
-uint16_t GREEN = dma_display->color565(0, 255, 0);
-uint16_t BLUE = dma_display->color565(0, 0, 255);
-
 // alles + 1
 // colors: 0: red , 1: blau, 2: yellow, 3: orange, 4: magenta, 5: dark grey, 6: green, 7: brown, 8: white 9: light blue
 int colors[] = {63488, 2110, 65504, 64512, 59608, 16968, 4064, 14593, 65535, 1503};
@@ -388,8 +381,8 @@ int logo[512] = {
   0, 0, 0, 0, 0, 0, 0, 28501, 28501, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 28501, 28501, 0, 0, 0, 0, 0, 0, 0, 
   0, 0, 0, 0, 0, 28501, 28501, 0, 0, 65535, 65535, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1503, 1503, 0, 0, 28501, 28501, 0, 0, 0, 0, 0, 
   0, 0, 0, 0, 0, 28501, 28501, 0, 0, 65535, 65535, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1503, 1503, 0, 0, 28501, 28501, 0, 0, 0, 0, 0, 
-  0, 0, 0, 0, 0, 28501, 28501, 65535, 65535, 0, 0, 65535, 65535, 0, 0, 0, 0, 0, 0, 4064, 4064, 0, 0, 63488, 63488, 28501, 28501, 0, 0, 0, 0, 0, 
-  0, 0, 0, 0, 0, 28501, 28501, 65535, 65535, 0, 0, 65535, 65535, 0, 0, 0, 0, 0, 0, 4064, 4064, 0, 0, 63488, 63488, 28501, 28501, 0, 0, 0, 0, 0, 
+  0, 0, 0, 0, 0, 28501, 28501, 65535, 65535, 65535, 65535, 65535, 65535, 0, 0, 0, 0, 0, 0, 4064, 4064, 0, 0, 63488, 63488, 28501, 28501, 0, 0, 0, 0, 0, 
+  0, 0, 0, 0, 0, 28501, 28501, 65535, 65535, 65535, 65535, 65535, 65535, 0, 0, 0, 0, 0, 0, 4064, 4064, 0, 0, 63488, 63488, 28501, 28501, 0, 0, 0, 0, 0, 
   0, 0, 0, 0, 0, 28501, 28501, 0, 0, 65535, 65535, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 65504, 65504, 0, 0, 28501, 28501, 0, 0, 0, 0, 0, 
   0, 0, 0, 0, 0, 28501, 28501, 0, 0, 65535, 65535, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 65504, 65504, 0, 0, 28501, 28501, 0, 0, 0, 0, 0, 
   0, 0, 0, 0, 0, 0, 0, 28501, 28501, 0, 0, 0, 0, 28501, 28501, 28501, 28501, 28501, 28501, 0, 0, 0, 0, 28501, 28501, 0, 0, 0, 0, 0, 0, 0, 
@@ -398,7 +391,7 @@ int logo[512] = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 28501, 28501, 28501, 28501, 0, 0, 0, 0, 0, 0, 28501, 28501, 28501, 28501, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-char* matrix_name = "pixx ink 1";
+char* matrix_name = "pixx ink 3";
 
 char memblock[50];
 char* text;
@@ -434,7 +427,11 @@ void drawPoints(uint16_t color, char* pointsStr){
   dma_display->fillScreen(dma_display->color444(0, 0, 0));
 
   uint8_t w = 0;
+  if (strlen(pointsStr) == 2){
     dma_display->setCursor(10, 4);
+  } else {
+    dma_display->setCursor(10, 4);
+  }
     for (w=0; w<strlen(text); w++) {
       if (pointsStr[w] == '\0'){
         return;
@@ -531,22 +528,10 @@ class ServerCallbacks: public BLEServerCallbacks {
 // --------------------------------------------------------------------------------------------------------
 // HELPER FUNCTIONS ---------------------------------------------------------------------------------------
 
-char* appendCharToCharArray(char* array, char a){
-  size_t len = strlen(array);
-  char* ret = new char[len+2];
-
-  strcpy(ret, array);    
-  ret[len] = a;
-  ret[len+1] = '\0';
-
-  return ret;
-}
-
 char * string_copy(const char *from, char *to) {
     for (char *p = to; ( *p = *from ) != '\0'; ++p, ++from){
         ;
     }
-
     return to;
 }
 
@@ -627,6 +612,7 @@ void loop() {
   
   // If mode changed, stop drawing text task
   if (prev_MODE != MODE) {
+    dataCharacteristic->setValue("");
     if (drawing){
       vTaskDelete(handle_drawText);
       drawing = false;
@@ -642,7 +628,7 @@ void loop() {
       modeCharacteristic->setValue("1");
       return;
     }
-    startDrawingThread("Ready to connect...");
+    startDrawingThread("Connect to pixx ink 3...");
   }
   // CONNECTED, BUT NOT READY YET - Not all devices connected, no game chosen, etc.
   else if (MODE == '1'){
@@ -729,7 +715,7 @@ void loop() {
   // Check button states
   // blue button: digitRead == 1 --> PRESSED
   // black/red button: digitRead == 0 --> PRESSED
-  if (digitalRead(buttonPin) == 0 && buttonPressed == 0){
+  if (digitalRead(buttonPin) == 1 && buttonPressed == 0){
       Serial.println("BUTTON PRESSED!");
       char* buttonState = "1";
       buttonCharacteristic->setValue(buttonState);
@@ -737,7 +723,7 @@ void loop() {
       delay(25);
       buttonCharacteristic->setValue("0");
       buttonPressed++;
-  } else if (digitalRead(buttonPin) == 0){
+  } else if (digitalRead(buttonPin) == 1){
     Serial.println("buttonPressed:");
     Serial.println(buttonPressed);
     buttonPressed++;

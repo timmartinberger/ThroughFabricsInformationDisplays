@@ -13,10 +13,12 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
@@ -48,6 +50,7 @@ public class BLEService extends Service {
 
     // Callback, um Verbindung zu überwachen -------------------------------------------------------
     private final BluetoothGattCallback bluetoothGattCallback = new BluetoothGattCallback() {
+        @RequiresApi(api = Build.VERSION_CODES.P)
         @SuppressLint("MissingPermission")
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
@@ -65,6 +68,9 @@ public class BLEService extends Service {
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 // disconnected from the GATT Server
                 broadcastUpdate(ACTION_GATT_DISCONNECTED, gatt);
+                disconnect(gatt);
+                close(gatt);
+                Devices.removeDevice(gatt.getDevice().getAddress());
             }
         }
 
@@ -74,12 +80,10 @@ public class BLEService extends Service {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED, gatt);
                 try {
-                    Thread.sleep(200);
+                    Thread.sleep(100);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                // Todo: Check if this is the right place to activate notification
-                //setCharacteristicNotification(gatt.getService(UUID.fromString(SERVICE_UUID)).getCharacteristic(UUID.fromString(BUTTON_CHARACTERISTIC_UUID)), true);
             } else {
                 Log.i("testbt", "onServicesDiscovered received: " + status);
             }
@@ -166,17 +170,6 @@ public class BLEService extends Service {
         return bluetoothGatt.getServices();
     }
 
-    // read value
-    @SuppressLint("MissingPermission")
-    public void readCharacteristic(BluetoothGatt gatt) {
-        if (gatt == null) {
-            Log.w("testbt", "BluetoothGatt not initialized");
-            return;
-        }
-        BluetoothGattCharacteristic characteristic = gatt.getService(UUID.fromString(SERVICE_UUID)).getCharacteristic(UUID.fromString(MODE_CHARACTERISTIC_UUID));
-        gatt.readCharacteristic(characteristic);
-    }
-
 
     // write string value
     @SuppressLint("MissingPermission")
@@ -191,7 +184,6 @@ public class BLEService extends Service {
         BluetoothGattCharacteristic characteristic = gatt.getService(UUID.fromString(SERVICE_UUID)).getCharacteristic(UUID.fromString(characteristicUUID));
         characteristic.setValue(value);
 
-        //todo check this
         values.set(bluetoothGatts.indexOf(gatt), value);
         gatt.writeCharacteristic(characteristic);
         try {
@@ -214,7 +206,6 @@ public class BLEService extends Service {
             }
 
             byte[] value = data.getBytes(StandardCharsets.UTF_8);
-            //todo check this
             values.set(bluetoothGatts.indexOf(gatt), value);
             BluetoothGattCharacteristic characteristic = gatt.getService(UUID.fromString(SERVICE_UUID)).getCharacteristic(UUID.fromString(characteristicUUID));
             characteristic.setValue(value);
@@ -239,7 +230,7 @@ public class BLEService extends Service {
         BluetoothGattCharacteristic characteristic = gatt.getService(UUID.fromString(SERVICE_UUID)).getCharacteristic(UUID.fromString(characteristicUUID));
         characteristic.setValue(data);
         Log.i("testbt", "writeByteArray: " + data.length + " " +  data.toString());
-        //todo check this
+
         values.set(bluetoothGatts.indexOf(gatt), data);
         gatt.writeCharacteristic(characteristic);
         try {
@@ -247,7 +238,6 @@ public class BLEService extends Service {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
     }
 
     // setup notification
@@ -261,27 +251,13 @@ public class BLEService extends Service {
         BluetoothGattCharacteristic characteristic = gatt.getService(UUID.fromString(SERVICE_UUID)).getCharacteristic(UUID.fromString(characteristicUUID));
         gatt.setCharacteristicNotification(characteristic, enabled);
 
-        // This is specific to Heart Rate Measurement.
-        if (MODE_CHARACTERISTIC_UUID.equals(characteristic.getUuid())) {
-            BluetoothGattDescriptor descriptor = characteristic.getDescriptor(UUID.fromString(SampleGattAttributes.CLIENT_CHARACTERISTIC_CONFIG));
-            descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-            gatt.writeDescriptor(descriptor);
-        }
+//        // This is specific to Heart Rate Measurement.
+//        if (MODE_CHARACTERISTIC_UUID.equals(characteristic.getUuid())) {
+//            BluetoothGattDescriptor descriptor = characteristic.getDescriptor(UUID.fromString(SampleGattAttributes.CLIENT_CHARACTERISTIC_CONFIG));
+//            descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+//            gatt.writeDescriptor(descriptor);
+//        }
     }
-
-    public static class SampleGattAttributes {
-        private static HashMap<String, String> attributes = new HashMap();
-        public static String HEART_RATE_MEASUREMENT = "00002a37-0000-1000-8000-00805f9b34fb";
-        public static String CLIENT_CHARACTERISTIC_CONFIG = "00002902-0000-1000-8000-00805f9b34fb";
-
-        static {
-            // Sample Services.
-            attributes.put("0000180d-0000-1000-8000-00805f9b34fb", "Heart Rate Service");
-            // Sample Characteristics.
-            attributes.put(HEART_RATE_MEASUREMENT, "Heart Rate Measurement");
-        }
-    }
-
 
     // Service/BLE-Verbindung beenden --------------------------------------------------------------
     @Override
@@ -310,6 +286,7 @@ public class BLEService extends Service {
             return;
         }
         gatt.close();
+        values.remove(bluetoothGatts.indexOf(gatt));
         bluetoothGatts.remove(gatt);
     }
 

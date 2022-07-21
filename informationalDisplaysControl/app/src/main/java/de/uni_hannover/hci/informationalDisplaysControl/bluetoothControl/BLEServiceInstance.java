@@ -24,8 +24,6 @@ public class BLEServiceInstance extends Application {
                 // call functions on service to check connection and connect to devices
                 if (!bleService.initialize()) {
                     Log.e("testbt", "Unable to initialize Bluetooth");
-                    // todo brauchen wir the following statement
-                    // finish();
                 }
                 // perform device connection
                 for(int i = 0; i < Devices.getDeviceCount(); i++) {

@@ -8,8 +8,10 @@ import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.BLEServ
 import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.BLEServiceInstance;
 import de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl.Devices;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -40,10 +42,25 @@ public class DobbleController extends AppCompatActivity {
         ImageView imageView = findViewById(R.id.gameImage);
         imageView.setImageDrawable(getDrawable(R.drawable.dobble));
 
+
+        if (Devices.getDeviceCount() < 3){
+            new AlertDialog.Builder(this)
+                    .setIcon(R.drawable.ic_baseline_videogame_asset_24)
+                    .setTitle("You are not enough players!")
+                    .setMessage("For Dobble there are three players required. Select another game...")
+                    .setNeutralButton("Okay", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            finish();
+                        }
+            }).show();
+        }
+
         this.roundsInput = findViewById(R.id.roundsInput);
         BLEServiceInstance.getBLEService().writeCharacteristicToAll(BLEService.MODE_CHARACTERISTIC_UUID, "5");
         OnBackPressedCallback endDobbleCallback = Utils.endGameCallback(this);
         this.getOnBackPressedDispatcher().addCallback(this, endDobbleCallback);
+
     }
 
     private int  getRounds() {

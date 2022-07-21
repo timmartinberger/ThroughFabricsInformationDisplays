@@ -57,7 +57,7 @@ public class Utils {
 
     private static AlertDialog.Builder endGameDialog(AppCompatActivity context) {
          return new AlertDialog.Builder(context)
-        .setIcon(android.R.drawable.ic_dialog_alert)
+        .setIcon(R.drawable.ic_baseline_videogame_asset_24)
         .setTitle("Do you want to end this game?")
         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override

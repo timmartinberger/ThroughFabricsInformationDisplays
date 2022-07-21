@@ -1,6 +1,8 @@
 package de.uni_hannover.hci.informationalDisplaysControl.bluetoothControl;
 import android.net.MacAddress;
+import android.os.Build;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
@@ -40,8 +42,9 @@ public class Devices {
         return deviceNames.get(index);
     }
 
-    public static void removeDevice(MacAddress address){
-        int idx = deviceAddress.indexOf(address);
+    @RequiresApi(api = Build.VERSION_CODES.P)
+    public static void removeDevice(String address){
+        int idx = deviceAddress.indexOf(MacAddress.fromString(address));
         deviceNames.remove(idx);
         deviceAddress.remove(idx);
         countDevices--;
