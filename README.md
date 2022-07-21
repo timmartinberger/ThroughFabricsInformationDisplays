@@ -1,3 +1,3 @@
 # ThroughFrabricsInformationDisplays
 
-![pixx ink](PIXX_INK.png)
+![pixx ink](PIXX_INK.jpg)
