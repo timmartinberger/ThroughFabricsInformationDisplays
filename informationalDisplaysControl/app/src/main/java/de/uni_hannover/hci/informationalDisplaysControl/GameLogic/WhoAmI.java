@@ -58,7 +58,6 @@ public class WhoAmI extends AppCompatActivity {
     }
 
     public void startGame(View view) {
-        System.out.println("Starting the game...");
         if(allNames.isEmpty()) {
             initNameList();
         }
@@ -66,13 +65,7 @@ public class WhoAmI extends AppCompatActivity {
         ArrayList<String> nameList = generateNameList(numberOfPlayers);
         if(nameList.isEmpty()) {
             msg("No devices connected!");
-            System.out.println("No devices connected!");
             return;
-        }
-        //for each name in nameList send to a device
-        for(String name: nameList) {
-            System.out.println(name);
-
         }
         sendNamesToDevices(nameList);
         msg("The game has started!");
@@ -101,19 +94,16 @@ public class WhoAmI extends AppCompatActivity {
         }
     }
 
-
     private void sendNamesToDevices(ArrayList<String> nameList) {
         for(int i = 0; i < nameList.size(); i++){
             BLEServiceInstance.getBLEService().writeCharacteristic(Devices.getMacAsString(i), BLEService.DATA_CHARACTERISTIC_UUID, nameList.get(i));
         }
     }
 
-
     // Fast way to call Toast
     private void msg(String s) {
         Toast.makeText(getApplicationContext(),s,Toast.LENGTH_LONG).show();
     }
-
 
     // Benachrichtigungen über Verbindungsstatus vom BLEService empfangen --------------------------
     private final BroadcastReceiver gattUpdateReceiver = new BroadcastReceiver() {
@@ -154,10 +144,6 @@ public class WhoAmI extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         registerReceiver(gattUpdateReceiver, BLEService.makeGattUpdateIntentFilter());
-//        if (bleService != null) {
-//            final boolean result = bleService.connect(ESP1Address);
-//            Log.i("testbt", "Connect request result=" + result);
-//        }
     }
 
     @Override
@@ -165,7 +151,6 @@ public class WhoAmI extends AppCompatActivity {
         super.onPause();
         unregisterReceiver(gattUpdateReceiver);
     }
-
 
     @Override
     protected void onDestroy() {
@@ -176,6 +161,5 @@ public class WhoAmI extends AppCompatActivity {
         }
         super.onDestroy();
     }
-
 
 }
